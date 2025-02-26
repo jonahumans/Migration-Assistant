@@ -16,15 +16,10 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Create necessary directories
-if not os.path.exists('input'):
-    os.makedirs('input')
-if not os.path.exists('output'):
-    os.makedirs('output')
-if not os.path.exists('static'):
-    os.makedirs('static')
-if not os.path.exists('templates'):
-    os.makedirs('templates')
+# Ensure directories exist
+for directory in ['input', 'output', 'static', 'templates']:
+    os.makedirs(directory, exist_ok=True)
+
 
 @app.route('/')
 def index():
@@ -61,10 +56,11 @@ def upload_file():
                     logger.error(f"Error clearing {directory}: {str(e)}")
                     return {'status': 'error', 'log': [f'Error preparing directories: {str(e)}']}
 
-        # Save new file
+        # Save new file with explicit permissions
         file_path = os.path.join('input', file.filename)
         try:
             file.save(file_path)
+            os.chmod(file_path, 0o666)  # Make file readable/writable
             logger.info(f"File saved successfully to {file_path}")
             log_messages.append("✓ File uploaded successfully")
         except Exception as e:
