@@ -42,8 +42,9 @@ def about():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return {'status': 'error', 'log': ['No file uploaded']}
+    try:
+        if 'file' not in request.files:
+            return {'status': 'error', 'log': ['No file uploaded']}, 400
 
     file = request.files['file']
     if file.filename == '':
@@ -106,6 +107,13 @@ def download_output():
                 zipf.write(file, os.path.basename(file))
     
     return send_file('output_files.zip', as_attachment=True)
+
+@app.errorhandler(Exception)
+def handle_error(e):
+    return {
+        'status': 'error',
+        'log': [str(e)]
+    }, 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
