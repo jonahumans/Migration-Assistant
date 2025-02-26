@@ -12,7 +12,7 @@
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f7f9fc;
+            background: linear-gradient(135deg, #f0f5ff 0%, #f5f3ff 100%);
         }
         .container {
             background-color: rgba(255, 255, 255, 0.95);
@@ -31,43 +31,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        h2 {
-            color: #3a0ca3;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 10px;
-            margin-top: 40px;
-        }
-        .step {
-            margin-bottom: 40px;
-            padding: 25px;
-            background: linear-gradient(to right, #f0f5ff, #f5f3ff);
-            border-radius: 12px;
-            border-left: 5px solid #4338ca;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .step:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(67, 56, 202, 0.1);
-        }
-        .step-title {
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            color: #3a0ca3;
-            display: flex;
-            align-items: center;
-        }
-        .step-number {
-            background-color: #4361ee;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            margin-right: 10px;
-        }
         .upload-area {
             border: 3px dashed #6366f1;
             border-radius: 12px;
@@ -77,25 +40,10 @@
             margin: 25px 0;
             cursor: pointer;
             transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
         }
-        .upload-area::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, rgba(99, 102, 241, 0.1), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .upload-area:hover::before {
-            opacity: 1;
-        }
-        #file-input {
-            display: none;
+        .upload-area:hover {
+            background: linear-gradient(135deg, #e8efff 0%, #ede9ff 100%);
+            transform: translateY(-2px);
         }
         .button {
             background: linear-gradient(135deg, #4338ca, #6366f1);
@@ -114,201 +62,105 @@
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
         .button:hover {
-            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
         }
         .button:disabled {
-            background-color: #cccccc;
+            background: #cccccc;
             cursor: not-allowed;
-        }
-        .box {
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-        .info-box {
-            background-color: #e0f7fa;
-            border-left: 5px solid #00b8d4;
-            padding: 15px;
-            margin: 15px 0;
+            transform: none;
+            box-shadow: none;
         }
         .output-box {
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
+            background: white;
+            border-radius: 8px;
             padding: 20px;
-            border-radius: 5px;
-            margin-top: 30px;
+            margin-top: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
             max-height: 300px;
             overflow-y: auto;
         }
-        .hidden {
+        #file-input {
             display: none;
-        }
-        .highlight {
-            background-color: #fff3cd;
-            padding: 2px 5px;
-            border-radius: 3px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Magic Product Data Helper</h1>
-
-        <div class="info-box">
-            <p><strong>Welcome!</strong> This tool helps organize your product data from spreadsheets. Upload your file below and we'll make it work with your online store.</p>
+        <div class="upload-area" id="upload-area">
+            <p>Drop your CSV file here or click to browse</p>
+            <input type="file" id="file-input" accept=".csv">
         </div>
-
-        <div class="step">
-            <div class="step-title"><span class="step-number">1</span> Upload Your Product Spreadsheet</div>
-            <p>Click below to upload your CSV file with all your product information.</p>
-
-            <div class="upload-area" id="upload-area">
-                <p>Drop your CSV file here or click to browse</p>
-                <p><small>Make sure it has columns like <span class="highlight">variant.sku</span>, <span class="highlight">brand</span>, <span class="highlight">description</span>, etc.</small></p>
-                <input type="file" id="file-input" accept=".csv">
-            </div>
+        <button class="button" id="process-button" disabled>Process File</button>
+        <div class="output-box" id="processing-log" style="display: none;">
+            <p>Processing started...</p>
         </div>
-
-        <div class="step">
-            <div class="step-title"><span class="step-number">2</span> What This Tool Does</div>
-            <p>This tool makes your product data work better by doing these simple things:</p>
-
-            <div class="box">
-                <strong>Cleans Up Your Data</strong>
-                <ul>
-                    <li>Removes any test or sample products</li>
-                    <li>Checks for duplicate product codes and fixes them</li>
-                    <li>Makes sure each product has all the required information</li>
-                </ul>
-            </div>
-
-            <div class="box">
-                <strong>Organizes Parent and Child Products</strong>
-                <ul>
-                    <li>Links products that come in different sizes or colors</li>
-                    <li>Creates parent products when you have multiple variations</li>
-                    <li>Connects each variation to its main parent product</li>
-                </ul>
-            </div>
-
-            <div class="box">
-                <strong>Prepares Your Data for Your Store</strong>
-                <ul>
-                    <li>Renames all columns to work with your online store system</li>
-                    <li>Creates special files for parent products and their variations</li>
-                    <li>Adds all the proper measurements and details to each product</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="step">
-            <div class="step-title"><span class="step-number">3</span> Run The Magic</div>
-            <p>Once your file is uploaded, click the button below to start the process:</p>
-            <button class="button" id="process-button" disabled>Process My Product Data</button>
-        </div>
-
-        <div class="step hidden" id="results-section">
-            <div class="step-title"><span class="step-number">4</span> Get Your Files</div>
-            <p>All done! Here are your processed files:</p>
-
-            <div class="output-box" id="processing-log">
-                <p>Processing started...</p>
-            </div>
-
-            <button class="button" id="download-button">Download All Files</button>
-        </div>
+        <button class="button" id="download-button" style="display: none;">Download Processed Files</button>
     </div>
 
     <script>
         const uploadArea = document.getElementById('upload-area');
         const fileInput = document.getElementById('file-input');
         const processButton = document.getElementById('process-button');
-        const resultsSection = document.getElementById('results-section');
         const processingLog = document.getElementById('processing-log');
         const downloadButton = document.getElementById('download-button');
 
-        // Handle file selection via click
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        // Handle drag and drop
+        uploadArea.addEventListener('click', () => fileInput.click());
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.backgroundColor = '#e6eeff';
+            uploadArea.style.background = '#e8efff';
         });
-
         uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.backgroundColor = '#f0f5ff';
+            uploadArea.style.background = '#f0f5ff';
         });
-
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadArea.style.backgroundColor = '#f0f5ff';
-
             if (e.dataTransfer.files.length) {
                 fileInput.files = e.dataTransfer.files;
                 handleFileSelect();
             }
         });
 
-        // Handle file selection change
         fileInput.addEventListener('change', handleFileSelect);
 
         function handleFileSelect() {
             if (fileInput.files.length > 0) {
-                const fileName = fileInput.files[0].name;
-                uploadArea.innerHTML = `<p><strong>Selected file:</strong> ${fileName}</p>`;
+                uploadArea.innerHTML = `<p>Selected: ${fileInput.files[0].name}</p>`;
                 processButton.disabled = false;
             }
         }
 
-        // Handle process button click
         processButton.addEventListener('click', () => {
-            // Create a FormData object and add the file
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
             processButton.disabled = true;
             processButton.textContent = 'Processing...';
-            resultsSection.classList.remove('hidden');
-            processingLog.innerHTML = '<p>Starting to process your file...</p>';
+            processingLog.style.display = 'block';
 
-            // Send the file to the server
             fetch('/upload', {
                 method: 'POST',
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
-                processingLog.innerHTML = '';
-
-                // Add each log message to the processing log
-                if (data.log && data.log.length) {
-                    data.log.forEach(message => {
-                        processingLog.innerHTML += `<p>${message}</p>`;
-                    });
-                }
-
-                processingLog.scrollTop = processingLog.scrollHeight;
-
+                processingLog.innerHTML = data.log.join('<br>');
                 if (data.status === 'success') {
-                    processButton.textContent = 'Processing Complete!';
-                    downloadButton.disabled = false;
+                    downloadButton.style.display = 'block';
+                    processButton.textContent = 'Complete!';
                 } else {
-                    processButton.textContent = 'Error Processing File';
+                    processButton.textContent = 'Error';
                     processButton.style.backgroundColor = '#dc3545';
                 }
             })
             .catch(error => {
-                processingLog.innerHTML += `<p>Error: ${error.message}</p>`;
-                processButton.textContent = 'Error Processing File';
+                processingLog.innerHTML += `<br>Error: ${error.message}`;
+                processButton.textContent = 'Error';
                 processButton.style.backgroundColor = '#dc3545';
             });
         });
 
-        // Handle download button click
         downloadButton.addEventListener('click', () => {
             window.location.href = '/download';
         });
