@@ -47,7 +47,8 @@ def clean_barcode_column(df):
     if 'variant.barcode' in df.columns:
         df['variant.barcode'] = pd.to_numeric(df['variant.barcode'], errors='ignore')
         duplicates = df[df['variant.barcode'].duplicated(keep=False)].copy()
-        df = df[~df['variant.barcode'].duplicated(keep=False)]
+        # Keep first occurrence in main df
+        df = df[~df['variant.barcode'].duplicated(keep='first')]
     return df, duplicates
 
 def clear_input_directory(input_directory):

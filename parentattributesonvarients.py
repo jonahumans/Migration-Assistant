@@ -86,10 +86,11 @@ def clean_sku_and_barcode(df):
     df = df[df['variant.sku'].notna() & (df['variant.sku'] != '')]
     duplicated_skus_df = df[df['variant.sku'].duplicated(keep=False)].copy()
     if not duplicated_skus_df.empty:
-        error_file = os.path.join(output_directory, 'duplicate_skus.csv')
+        error_file = os.path.join(output_directory, 'duplicates.csv')
         duplicated_skus_df.to_csv(error_file, index=False)
-        logging.warning(f"Duplicate SKUs saved to {error_file}")
-        df = df[~df['variant.sku'].duplicated(keep='first')]
+        logging.info(f"Duplicate SKUs saved to {error_file}")
+    # Keep first occurrence in main df
+    df = df[~df['variant.sku'].duplicated(keep='first')]
 
     df = df.rename(columns={'variant.sku': 'sku'})
     columns_to_export = [col for col in df.columns if col != 'sku' and col != 'brand' and col != 'description']
