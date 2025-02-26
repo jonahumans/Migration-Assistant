@@ -38,20 +38,17 @@ def ensure_required_columns(df, required_columns):
     if missing_columns:
         logging.warning(f"Missing columns detected: {missing_columns}. Adding them with default values.")
         for col in missing_columns:
-            df[col] = None
+            df[col] = None  # Use NaN instead of empty string
     return df
 
 def clean_barcode_column(df):
     """ Ensure the barcode column is properly formatted without losing data """
+    duplicates = None
     if 'variant.barcode' in df.columns:
         df['variant.barcode'] = pd.to_numeric(df['variant.barcode'], errors='ignore')
-        duplicates = df[df['variant.barcode'].duplicated(keep=False)]
-        if not duplicates.empty:
-            error_file = os.path.join(output_directory, 'duplicate_barcodes.csv')
-            duplicates.to_csv(error_file, index=False)
-            logging.warning(f"Duplicate barcodes saved to {error_file}")
-        df = df[~df['variant.barcode'].duplicated(keep='first')]
-    return df
+        duplicates = df[df['variant.barcode'].duplicated(keep=False)].copy()
+        df = df[~df['variant.barcode'].duplicated(keep=False)]
+    return df, duplicates
 
 def clear_input_directory(input_directory):
     """ Remove all files in the input directory """
@@ -73,7 +70,13 @@ def main():
     # Define required columns
     required_columns = ['variant.sku', 'variant.product_id', 'variant.barcode', 'variant.price']
     df = ensure_required_columns(df, required_columns)
-    df = clean_barcode_column(df)
+    df, duplicate_barcodes = clean_barcode_column(df)
+    
+    # Save duplicates if any found
+    if duplicate_barcodes is not None and not duplicate_barcodes.empty:
+        error_file = os.path.join(output_directory, 'duplicate_barcodes.csv')
+        duplicate_barcodes.to_csv(error_file, index=False)
+        logging.warning(f"Duplicate barcodes saved to {error_file}")
     
     # Ensure output directory exists
     if not os.path.exists(output_directory):
