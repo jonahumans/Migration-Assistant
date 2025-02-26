@@ -13,7 +13,6 @@ requiredFiles = [".replit", "replit.nix"]
 [deployment]
 deploymentTarget = "static"
 publicDir = "templates"
-run = ["sh", "-c", "python main.py"]
 
 [[ports]]
 localPort = 80
