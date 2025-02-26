@@ -311,8 +311,8 @@
                 progressBar.style.width = '100%';
                 logOutput.textContent = data.log.join('\n');
                 if (data.status === 'success') {
-                    downloadOutputBtn.style.display = 'inline-block';
-                    logOutput.textContent += '\nProcessing complete! You can now download the files.';
+                    downloadBtn.style.display = 'inline-block';
+                    logOutput.textContent += '\nProcessing complete! Click Download to get all files.';
                 }
             })
             .catch(error => {

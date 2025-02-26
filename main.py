@@ -94,13 +94,17 @@ def upload_file():
 
 @app.route('/download')
 def download():
-    return send_file('processed_files.zip', as_attachment=True)
-
-@app.route('/download_output')
-def download_output():
-    output_files = ['output/group_skus.csv', 'output/parent_columns.txt', 'output/parents.csv']
+    output_files = [
+        'input/processed_data.csv',
+        'output/group_skus.csv', 
+        'output/parent_columns.txt',
+        'output/parents.csv',
+        'output/variant_columns.txt',
+        'output/variantattributes.csv',
+        'output/parentattributesonvarients.csv'
+    ]
     
-    # Create a zip of just the output files
+    # Create a zip of all files
     with zipfile.ZipFile('output_files.zip', 'w') as zipf:
         for file in output_files:
             if os.path.exists(file):
