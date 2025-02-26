@@ -6,10 +6,10 @@ import subprocess
 
 app = Flask(__name__)
 
-# Set absolute paths for templates and static files
-current_dir = os.path.dirname(os.path.abspath(__file__))
-app.template_folder = os.path.join(current_dir, 'templates')
-app.static_folder = os.path.join(current_dir, 'static')
+# Set template and static folders relative to app root
+app = Flask(__name__, 
+            template_folder='templates',
+            static_folder='static')
 
 # Enable debug logging
 import logging
@@ -153,10 +153,26 @@ def download():
 
 @app.errorhandler(Exception)
 def handle_error(e):
+    error_msg = str(e)
+    status_code = getattr(e, 'code', 500)
+    
+    # Log the error for debugging
+    logging.error(f"Error occurred: {error_msg}")
+    
+    if status_code == 413:
+        error_msg = "File too large. Please upload a smaller file."
+    elif status_code == 404:
+        error_msg = "Resource not found."
+    elif status_code == 400:
+        error_msg = "Invalid request. Please check your input."
+    
     return {
         'status': 'error',
-        'log': [str(e)]
-    }, 500
+        'log': [error_msg]
+    }, status_code
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    # Get port from environment variable or default to 8080
+    port = int(os.environ.get('PORT', 8080))
+    # In production, disable debug mode and use 0.0.0.0 to accept all incoming connections
+    app.run(host='0.0.0.0', port=port, debug=False)
