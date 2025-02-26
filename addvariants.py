@@ -65,10 +65,10 @@ def main():
     # Load the CSV file
     df = load_file_from_directory(input_directory)
     
-    # Define required columns
+    # Define required columns (Modify as needed for each script)
     required_columns = ['variant.sku', 'variant.product_id', 'variant.barcode', 'variant.price']
     df = ensure_required_columns(df, required_columns)
-    df = clean_barcode_column(df)
+    df = clean_barcode_column(df)  # Apply barcode cleaning
     
     # Ensure output directory exists
     if not os.path.exists(output_directory):

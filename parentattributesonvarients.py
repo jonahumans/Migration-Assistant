@@ -123,6 +123,7 @@ def main():
         os.makedirs(output_directory)
     output_file = os.path.join(output_directory, 'parentattributesonvarients.csv')
     df.to_csv(output_file, index=False)
+    
     logging.info(f"Successfully filtered the data! The selected data is saved to {output_file}")
 
 if __name__ == "__main__":
