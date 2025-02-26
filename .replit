@@ -45,3 +45,11 @@ author = 40020255
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python main.py"
+
+[[workflows.workflow]]
+name = "Run Automation"
+author = 40020255
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python automation.py"
