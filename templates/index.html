@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +10,7 @@
             --text-color: #8892b0;
             --highlight-color: #64ffda;
         }
-        
+
         body {
             font-family: 'SF Mono', 'Fira Code', monospace;
             margin: 0;
@@ -173,10 +172,10 @@
         <a href="/">Migration Assistant</a>
         <a href="/about">About</a>
     </nav>
-    
+
     <div class="container">
         <h1>Migration Assistant</h1>
-        
+
         <div class="info-box">
             <p><strong>Welcome!</strong> This tool will save hundreds of man hours in migration.</p>
             <p>Made in collaboration with Jaden Gant</p>
@@ -185,7 +184,7 @@
         <div class="step">
             <div class="step-title"><span class="step-number">1</span> Upload Your Product Spreadsheet</div>
             <p>Click below to upload your CSV file with all your product information.</p>
-            
+
             <div class="upload-area" id="upload-area">
                 <p>Drop your CSV file here or click to browse</p>
                 <input type="file" id="file-input" accept=".csv">
@@ -198,7 +197,7 @@
         <div class="step">
             <div class="step-title"><span class="step-number">2</span> What This Tool Does</div>
             <p>This tool makes your product data work better by doing these simple things:</p>
-            
+
             <div class="box">
                 <strong>Cleans Up Your Data</strong>
                 <ul>
@@ -207,7 +206,7 @@
                     <li>Makes sure each product has all the required information</li>
                 </ul>
             </div>
-            
+
             <div class="box">
                 <strong>Organizes Parent and Child Products</strong>
                 <ul>
@@ -216,7 +215,7 @@
                     <li>Connects each variation to its main parent product</li>
                 </ul>
             </div>
-            
+
             <div class="box">
                 <strong>Prepares Your Data for Your Store</strong>
                 <ul>
@@ -275,7 +274,8 @@
                 progressBar.style.width = '100%';
                 logOutput.textContent = data.log.join('\n');
                 if (data.status === 'success') {
-                    downloadBtn.style.display = 'inline-block';
+                    logOutput.textContent += '\nStarting download...';
+                    window.location.href = '/download';
                 }
             })
             .catch(error => {
