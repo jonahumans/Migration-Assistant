@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,15 +15,21 @@
             background-color: #f7f9fc;
         }
         .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            backdrop-filter: blur(10px);
         }
         h1 {
-            color: #4361ee;
+            color: #4338ca;
             text-align: center;
             margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2.5em;
+            background: linear-gradient(120deg, #4338ca, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         h2 {
             color: #3a0ca3;
@@ -34,10 +39,15 @@
         }
         .step {
             margin-bottom: 40px;
-            padding: 20px;
-            background-color: #f0f5ff;
-            border-radius: 8px;
-            border-left: 5px solid #4361ee;
+            padding: 25px;
+            background: linear-gradient(to right, #f0f5ff, #f5f3ff);
+            border-radius: 12px;
+            border-left: 5px solid #4338ca;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 56, 202, 0.1);
         }
         .step-title {
             font-weight: bold;
@@ -59,35 +69,52 @@
             margin-right: 10px;
         }
         .upload-area {
-            border: 3px dashed #4361ee;
-            border-radius: 8px;
-            padding: 30px;
+            border: 3px dashed #6366f1;
+            border-radius: 12px;
+            padding: 35px;
             text-align: center;
-            background-color: #f0f5ff;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #f0f5ff 0%, #f5f3ff 100%);
+            margin: 25px 0;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
-        .upload-area:hover {
-            background-color: #e6eeff;
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(99, 102, 241, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .upload-area:hover::before {
+            opacity: 1;
         }
         #file-input {
             display: none;
         }
         .button {
-            background-color: #4361ee;
+            background: linear-gradient(135deg, #4338ca, #6366f1);
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 14px 28px;
             font-size: 1.1em;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             display: block;
             margin: 20px auto;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
         .button:hover {
-            background-color: #3a0ca3;
+            background-position: right center;
         }
         .button:disabled {
             background-color: #cccccc;
@@ -127,7 +154,7 @@
 <body>
     <div class="container">
         <h1>Magic Product Data Helper</h1>
-        
+
         <div class="info-box">
             <p><strong>Welcome!</strong> This tool helps organize your product data from spreadsheets. Upload your file below and we'll make it work with your online store.</p>
         </div>
@@ -135,7 +162,7 @@
         <div class="step">
             <div class="step-title"><span class="step-number">1</span> Upload Your Product Spreadsheet</div>
             <p>Click below to upload your CSV file with all your product information.</p>
-            
+
             <div class="upload-area" id="upload-area">
                 <p>Drop your CSV file here or click to browse</p>
                 <p><small>Make sure it has columns like <span class="highlight">variant.sku</span>, <span class="highlight">brand</span>, <span class="highlight">description</span>, etc.</small></p>
@@ -146,7 +173,7 @@
         <div class="step">
             <div class="step-title"><span class="step-number">2</span> What This Tool Does</div>
             <p>This tool makes your product data work better by doing these simple things:</p>
-            
+
             <div class="box">
                 <strong>Cleans Up Your Data</strong>
                 <ul>
@@ -155,7 +182,7 @@
                     <li>Makes sure each product has all the required information</li>
                 </ul>
             </div>
-            
+
             <div class="box">
                 <strong>Organizes Parent and Child Products</strong>
                 <ul>
@@ -164,7 +191,7 @@
                     <li>Connects each variation to its main parent product</li>
                 </ul>
             </div>
-            
+
             <div class="box">
                 <strong>Prepares Your Data for Your Store</strong>
                 <ul>
@@ -180,15 +207,15 @@
             <p>Once your file is uploaded, click the button below to start the process:</p>
             <button class="button" id="process-button" disabled>Process My Product Data</button>
         </div>
-        
+
         <div class="step hidden" id="results-section">
             <div class="step-title"><span class="step-number">4</span> Get Your Files</div>
             <p>All done! Here are your processed files:</p>
-            
+
             <div class="output-box" id="processing-log">
                 <p>Processing started...</p>
             </div>
-            
+
             <button class="button" id="download-button">Download All Files</button>
         </div>
     </div>
@@ -219,7 +246,7 @@
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.style.backgroundColor = '#f0f5ff';
-            
+
             if (e.dataTransfer.files.length) {
                 fileInput.files = e.dataTransfer.files;
                 handleFileSelect();
@@ -242,12 +269,12 @@
             // Create a FormData object and add the file
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
-            
+
             processButton.disabled = true;
             processButton.textContent = 'Processing...';
             resultsSection.classList.remove('hidden');
             processingLog.innerHTML = '<p>Starting to process your file...</p>';
-            
+
             // Send the file to the server
             fetch('/upload', {
                 method: 'POST',
@@ -256,16 +283,16 @@
             .then(response => response.json())
             .then(data => {
                 processingLog.innerHTML = '';
-                
+
                 // Add each log message to the processing log
                 if (data.log && data.log.length) {
                     data.log.forEach(message => {
                         processingLog.innerHTML += `<p>${message}</p>`;
                     });
                 }
-                
+
                 processingLog.scrollTop = processingLog.scrollHeight;
-                
+
                 if (data.status === 'success') {
                     processButton.textContent = 'Processing Complete!';
                     downloadButton.disabled = false;
