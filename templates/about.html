@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,72 +6,6 @@
     <title>About Jonah Umans</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .social-links {
-            margin-top: 20px;
-        }
-
-        .social-icon {
-            font-size: 24px;
-            margin-right: 20px;
-            color: var(--highlight-color);
-            transition: transform 0.3s;
-        }
-
-        .social-icon:hover {
-            transform: translateY(-5px);
-        }
-
-        .hero {
-            animation: fadeIn 1s ease-out;
-        }
-
-        .project-card {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .skill-bar {
-            height: 4px;
-            background: var(--highlight-color);
-            width: 0;
-            transition: width 1s ease-out;
-            margin-bottom: 20px;
-        }
-
-        .tech-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 20px;
-            margin-top: 40px;
-        }
-
-        .tech-item {
-            text-align: center;
-            padding: 20px;
-            background: #112240;
-            border-radius: 8px;
-            transition: transform 0.3s;
-        }
-
-        .tech-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .tech-item i {
-            font-size: 32px;
-            color: var(--highlight-color);
-            margin-bottom: 10px;
-        }
         :root {
             --primary-color: #0a192f;
             --text-color: #8892b0;
@@ -115,7 +48,7 @@
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 60px 2rem;
+            padding: 100px 2rem;
         }
 
         .hero {
@@ -149,6 +82,21 @@
             max-width: 540px;
             margin: 15px 0 30px;
             font-size: 16px;
+        }
+
+        .social-links {
+            margin-top: 20px;
+        }
+
+        .social-icon {
+            font-size: 24px;
+            margin-right: 20px;
+            color: var(--highlight-color);
+            transition: transform 0.3s;
+        }
+
+        .social-icon:hover {
+            transform: translateY(-5px);
         }
 
         .breadcrumb-container {
@@ -261,7 +209,6 @@
                         • Built Python tools for data transformation and validation
                     </div>
                 </div>
-                
             </div>
 
             <div class="small-heading" style="margin-top: 50px;">Education</div>
@@ -289,48 +236,6 @@
                 <div class="tech-stack">Python • Flask • Pandas • Data Processing</div>
             </div>
         </section>
-
-        <section class="tech-stack">
-            <div class="small-heading">Technologies I Work With</div>
-            <div class="tech-section">
-                <div class="tech-item">
-                    <i class="fab fa-python"></i>
-                    <p>Python</p>
-                    <div class="skill-bar" data-width="90"></div>
-                </div>
-                <div class="tech-item">
-                    <i class="fas fa-shopping-cart"></i>
-                    <p>Target+</p>
-                    <div class="skill-bar" data-width="85"></div>
-                </div>
-                <div class="tech-item">
-                    <i class="fas fa-table"></i>
-                    <p>Excel</p>
-                    <div class="skill-bar" data-width="90"></div>
-                </div>
-                <div class="tech-item">
-                    <i class="fab fa-aws"></i>
-                    <p>AWS</p>
-                    <div class="skill-bar" data-width="75"></div>
-                </div>
-            </div>
-        </section>
     </div>
-
-    <script>
-        // Animate skill bars on scroll
-        function animateSkillBars() {
-            const skillBars = document.querySelectorAll('.skill-bar');
-            skillBars.forEach(bar => {
-                const width = bar.getAttribute('data-width');
-                bar.style.width = width + '%';
-            });
-        }
-
-        // Trigger animation when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(animateSkillBars, 500);
-        });
-    </script>
 </body>
 </html>
