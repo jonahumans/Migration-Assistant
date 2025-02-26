@@ -24,10 +24,6 @@ def index():
 def portfolio():
     return render_template('portfolio.html')
 
-@app.route('/portfolio/')
-def portfolio_slash():
-    return render_template('portfolio.html')
-
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
