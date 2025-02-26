@@ -31,13 +31,12 @@ def index():
     return render_template('index.html')
 
 @app.route('/about')
+@app.route('/about/')
+@app.route('/portfolio')
+@app.route('/portfolio/')
 def about():
     logger.debug(f"Template folder: {app.template_folder}")
     logger.debug(f"Looking for about.html in: {os.path.join(app.template_folder, 'about.html')}")
-    return render_template('about.html')
-
-@app.route('/about/')
-def about_slash():
     return render_template('about.html')
 
 
