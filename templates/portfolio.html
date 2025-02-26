@@ -111,6 +111,49 @@
             font-size: 13px;
             margin-top: 20px;
         }
+
+        .experience {
+            margin: 100px 0;
+        }
+
+        .breadcrumb-container {
+            margin-top: 30px;
+        }
+
+        .breadcrumb-item {
+            background: #112240;
+            padding: 2rem;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+
+        .breadcrumb-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .breadcrumb-item .date {
+            color: var(--highlight-color);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .breadcrumb-item .position {
+            color: #ccd6f6;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb-item .company {
+            color: var(--highlight-color);
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .breadcrumb-item .description {
+            color: var(--text-color);
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -129,6 +172,33 @@
                 Currently, I'm focused on building data processing tools and web applications that help 
                 businesses streamline their operations.
             </p>
+        </section>
+
+        <section class="experience">
+            <div class="small-heading">Experience</div>
+            <div class="breadcrumb-container">
+                <div class="breadcrumb-item">
+                    <div class="date">2022 - Present</div>
+                    <div class="position">Product Development Engineer</div>
+                    <div class="company">Emulate Inc</div>
+                    <div class="description">Building data processing tools and web applications to streamline operations</div>
+                </div>
+                <div class="breadcrumb-item">
+                    <div class="date">2021 - 2022</div>
+                    <div class="position">Product Development Engineer</div>
+                    <div class="company">Millibatt Inc</div>
+                    <div class="description">Led product development initiatives and data management</div>
+                </div>
+            </div>
+
+            <div class="small-heading" style="margin-top: 50px;">Education</div>
+            <div class="breadcrumb-container">
+                <div class="breadcrumb-item">
+                    <div class="date">2017 - 2021</div>
+                    <div class="position">Bachelor of Science in Mechanical Engineering</div>
+                    <div class="company">Tufts University</div>
+                </div>
+            </div>
         </section>
 
         <section class="projects">
