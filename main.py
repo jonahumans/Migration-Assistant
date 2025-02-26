@@ -1,7 +1,10 @@
 
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, url_for
 import os
 import shutil
+
+template_dir = os.path.abspath('./templates')
+app = Flask(__name__, template_folder=template_dir)
 import zipfile
 import subprocess
 
@@ -93,4 +96,4 @@ def download():
     return send_file('processed_files.zip', as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, debug=False)
