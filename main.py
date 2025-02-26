@@ -132,4 +132,14 @@ def serve_file(filename):
         return {'status': 'error', 'message': f'File {filename} not found'}, 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=False)
+    # Initialize directories
+    for directory in ['input', 'output', 'static', 'templates']:
+        os.makedirs(directory, exist_ok=True)
+    
+    # Configure app for production
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+    app.config['UPLOAD_FOLDER'] = 'input'
+    app.config['OUTPUT_FOLDER'] = 'output'
+    
+    # Run with production settings
+    app.run(host='0.0.0.0', port=8080, debug=False, threaded=True)
