@@ -5,7 +5,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Migration Assistant</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary-color: #0a192f;
+            --text-color: #8892b0;
+            --highlight-color: #64ffda;
+        }
+        
+        body {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            margin: 0;
+            padding: 0;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 25, 47, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            text-align: right;
+            z-index: 100;
+        }
+
+        .nav a {
+            color: var(--highlight-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            font-size: 14px;
+        }
+
+        .nav a:hover {
+            border: 1px solid var(--highlight-color);
+            border-radius: 4px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 100px 2rem;
+        }
+
+        h1 {
+            color: #ccd6f6;
+            font-size: 60px;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .info-box {
+            background: #112240;
+            padding: 2rem;
+            border-radius: 4px;
+            margin: 30px 0;
+            color: var(--text-color);
+        }
+
+        .step {
+            margin: 40px 0;
+        }
+
+        .step-title {
+            color: var(--highlight-color);
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            background: rgba(100, 255, 218, 0.1);
+            color: var(--highlight-color);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--highlight-color);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: rgba(100, 255, 218, 0.1);
+        }
+
+        .box {
+            background: #112240;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin: 20px 0;
+            transition: transform 0.2s;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+        }
+
+        .box strong {
+            color: var(--highlight-color);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            color: var(--highlight-color);
+            font-family: monospace;
+        }
+
+        .box ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .box li {
+            margin: 5px 0;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        #progress-bar {
+            height: 4px;
+            width: 0;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        #log-output {
+            background: #112240;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            display: none;
+        }
+
+        #download-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--highlight-color);
+            color: var(--highlight-color);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 20px;
+        }
+
+        #download-btn:hover {
+            background: rgba(100, 255, 218, 0.1);
+        }
+    </style>
 </head>
 <body>
     <nav class="nav">
@@ -15,15 +176,116 @@
     
     <div class="container">
         <h1>Migration Assistant</h1>
+        
         <div class="info-box">
             <p><strong>Welcome!</strong> This tool will save hundreds of man hours in migration.</p>
             <p>Made in collaboration with Jaden Gant</p>
         </div>
-        <div class="upload-area" id="upload-area">
-            <input type="file" id="file-input" accept=".csv">
-            <p>Drop your CSV file here or click to browse</p>
+
+        <div class="step">
+            <div class="step-title"><span class="step-number">1</span> Upload Your Product Spreadsheet</div>
+            <p>Click below to upload your CSV file with all your product information.</p>
+            
+            <div class="upload-area" id="upload-area">
+                <p>Drop your CSV file here or click to browse</p>
+                <input type="file" id="file-input" accept=".csv">
+            </div>
+            <div id="progress-bar"></div>
+            <div id="log-output"></div>
+            <button id="download-btn">Download Processed Files</button>
+        </div>
+
+        <div class="step">
+            <div class="step-title"><span class="step-number">2</span> What This Tool Does</div>
+            <p>This tool makes your product data work better by doing these simple things:</p>
+            
+            <div class="box">
+                <strong>Cleans Up Your Data</strong>
+                <ul>
+                    <li>Removes any test or sample products</li>
+                    <li>Checks for duplicate product codes and fixes them</li>
+                    <li>Makes sure each product has all the required information</li>
+                </ul>
+            </div>
+            
+            <div class="box">
+                <strong>Organizes Parent and Child Products</strong>
+                <ul>
+                    <li>Links products that come in different sizes or colors</li>
+                    <li>Creates parent products when you have multiple variations</li>
+                    <li>Connects each variation to its main parent product</li>
+                </ul>
+            </div>
+            
+            <div class="box">
+                <strong>Prepares Your Data for Your Store</strong>
+                <ul>
+                    <li>Renames all columns to work with your online store system</li>
+                    <li>Creates special files for parent products and their variations</li>
+                    <li>Adds all the proper measurements and details to each product</li>
+                </ul>
+            </div>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const progressBar = document.getElementById('progress-bar');
+        const logOutput = document.getElementById('log-output');
+        const downloadBtn = document.getElementById('download-btn');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = 'rgba(100, 255, 218, 0.1)';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = 'transparent';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = 'transparent';
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                handleFile(file);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file);
+        });
+
+        function handleFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            progressBar.style.width = '0%';
+            logOutput.style.display = 'block';
+            logOutput.textContent = 'Processing...';
+            downloadBtn.style.display = 'none';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                progressBar.style.width = '100%';
+                logOutput.textContent = data.log.join('\n');
+                if (data.status === 'success') {
+                    downloadBtn.style.display = 'inline-block';
+                }
+            })
+            .catch(error => {
+                logOutput.textContent = 'Error: ' + error;
+            });
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            window.location.href = '/download';
+        });
+    </script>
 </body>
 </html>
