@@ -112,22 +112,26 @@ def download():
             if os.path.exists(file):
                 zipf.write(file, os.path.basename(file))
     
-    # Clean up input and output directories
+    # Force cleanup of all files
     for directory in ['input', 'output']:
         for file in os.listdir(directory):
             file_path = os.path.join(directory, file)
             try:
                 if os.path.isfile(file_path):
+                    # Force close any open file handles
+                    import gc
+                    gc.collect()
+                    os.chmod(file_path, 0o777)  # Give full permissions
                     os.remove(file_path)
                     logging.info(f"Deleted {file_path}")
             except Exception as e:
-                # Force close any open file handles
-                import gc
-                gc.collect()
+                logging.error(f"Failed to delete {file_path}: {e}")
                 try:
+                    import signal
+                    os.kill(os.getpid(), signal.SIGINT)  # Force interrupt to release file handles
                     os.remove(file_path)
-                except Exception as inner_e:
-                    logging.error(f"Failed to delete {file_path}: {inner_e}")
+                except:
+                    pass
     
     return send_file('output_files.zip', as_attachment=True)
 
