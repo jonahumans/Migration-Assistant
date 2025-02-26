@@ -10,6 +10,7 @@ processed_files.zip
 *.key
 *.pem
 credentials.json
+templates/report.html
 
 # Input/Output directories
 input/*
