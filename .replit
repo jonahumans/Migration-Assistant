@@ -13,7 +13,19 @@ requiredFiles = [".replit", "replit.nix"]
 [deployment]
 deploymentTarget = "static"
 publicDir = "static"
+run = ["sh", "-c", "python main.py"]
 
 [[ports]]
 localPort = 8080
 externalPort = 80
+
+[workflows]
+runButton = "Run"
+
+[[workflows.workflow]]
+name = "Run"
+author = 40020255
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
