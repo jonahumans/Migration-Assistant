@@ -159,4 +159,7 @@ def handle_error(e):
     }, 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    # Get port from environment variable or default to 8080
+    port = int(os.environ.get('PORT', 8080))
+    # In production, disable debug mode and use 0.0.0.0 to accept all incoming connections
+    app.run(host='0.0.0.0', port=port, debug=False)
