@@ -126,7 +126,17 @@ def upload_file():
 
 @app.route('/download')
 def download():
-    return send_file('processed_files.zip', as_attachment=True)
+    try:
+        return send_file('processed_files.zip', as_attachment=True)
+    except Exception as e:
+        return {'status': 'error', 'message': 'File not found or processing incomplete'}, 404
+
+@app.route('/files/<path:filename>')
+def serve_file(filename):
+    try:
+        return send_from_directory('output', filename)
+    except Exception as e:
+        return {'status': 'error', 'message': f'File {filename} not found'}, 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
