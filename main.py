@@ -24,13 +24,13 @@ if not os.path.exists('templates'):
 def index():
     return render_template('index.html')
 
-@app.route('/portfolio')
-def portfolio():
-    return render_template('portfolio.html')
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
-@app.route('/portfolio/')
-def portfolio_slash():
-    return render_template('portfolio.html')
+@app.route('/about/')
+def about_slash():
+    return render_template('about.html')
 
 
 @app.route('/upload', methods=['POST'])
