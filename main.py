@@ -45,8 +45,7 @@ def upload_file():
     try:
         if 'file' not in request.files:
             return {'status': 'error', 'log': ['No file uploaded']}, 400
-
-    file = request.files['file']
+        file = request.files['file']
     if file.filename == '':
         return {'status': 'error', 'log': ['No selected file']}
 
