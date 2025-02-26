@@ -58,12 +58,11 @@ def main():
     df = clean_sku_and_barcode(df)
     df = select_required_columns(df)
     df = rename_columns(df)
-
+    
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
     output_file = os.path.join(output_directory, 'variantattributes.csv')
     df.to_csv(output_file, index=False)
-    
     logging.info(f"Successfully filtered the data! The filtered data is saved to {output_file}")
 
 if __name__ == "__main__":

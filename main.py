@@ -16,10 +16,15 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Ensure directories exist
-for directory in ['input', 'output', 'static', 'templates']:
-    os.makedirs(directory, exist_ok=True)
-
+# Create necessary directories
+if not os.path.exists('input'):
+    os.makedirs('input')
+if not os.path.exists('output'):
+    os.makedirs('output')
+if not os.path.exists('static'):
+    os.makedirs('static')
+if not os.path.exists('templates'):
+    os.makedirs('templates')
 
 @app.route('/')
 def index():
@@ -30,6 +35,8 @@ def index():
 @app.route('/portfolio')
 @app.route('/portfolio/')
 def about():
+    logger.debug(f"Template folder: {app.template_folder}")
+    logger.debug(f"Looking for about.html in: {os.path.join(app.template_folder, 'about.html')}")
     return render_template('about.html')
 
 
@@ -42,111 +49,51 @@ def upload_file():
     if file.filename == '':
         return {'status': 'error', 'log': ['No selected file']}
 
-    if not file.filename.endswith('.csv'):
-        return {'status': 'error', 'log': ['Invalid file type - please upload a CSV file']}
-
-    log_messages = []
-    try:
+    if file and file.filename.endswith('.csv'):
         # Clear directories
         for directory in ['input', 'output']:
             for f in os.listdir(directory):
-                try:
-                    os.remove(os.path.join(directory, f))
-                except Exception as e:
-                    logger.error(f"Error clearing {directory}: {str(e)}")
-                    return {'status': 'error', 'log': [f'Error preparing directories: {str(e)}']}
+                os.remove(os.path.join(directory, f))
 
-        # Save new file with explicit permissions
+        # Save new file
         file_path = os.path.join('input', file.filename)
-        try:
-            file.save(file_path)
-            os.chmod(file_path, 0o666)  # Make file readable/writable
-            logger.info(f"File saved successfully to {file_path}")
-            log_messages.append("✓ File uploaded successfully")
-        except Exception as e:
-            logger.error(f"Error saving file: {str(e)}")
-            return {'status': 'error', 'log': [f'Error saving file: {str(e)}']}
+        file.save(file_path)
 
-        scripts = ["addvariants.py", "parentattributesonvarients.py", "variantattributes.py"]
-        for script in scripts:
-            log_messages.append(f"Running {script}...")
-            try:
-                result = subprocess.run(
-                    ['python', script], 
-                    capture_output=True, 
-                    text=True,
-                    timeout=300  # 5 minute timeout
-                )
+        log_messages = []
+        try:
+            scripts = ["addvariants.py", "parentattributesonvarients.py", "variantattributes.py"]
+            for script in scripts:
+                log_messages.append(f"Running {script}...")
+                result = subprocess.run(['python', script], capture_output=True, text=True)
                 if result.returncode == 0:
-                    logger.info(f"{script} completed successfully")
-                    log_messages.append(f"✓ {script} completed successfully")
+                    log_messages.append(f"✓ {script} completed successfully.")
                     if result.stdout:
                         log_messages.append(result.stdout)
                 else:
-                    error_msg = f"Error in {script}: {result.stderr}"
-                    logger.error(error_msg)
-                    return {'status': 'error', 'log': log_messages + [error_msg]}
-            except subprocess.TimeoutExpired:
-                error_msg = f"Timeout running {script} - process took too long"
-                logger.error(error_msg)
-                return {'status': 'error', 'log': log_messages + [error_msg]}
-            except Exception as e:
-                error_msg = f"Error running {script}: {str(e)}"
-                logger.error(error_msg)
-                return {'status': 'error', 'log': log_messages + [error_msg]}
+                    log_messages.append(f"✗ Error in {script}:")
+                    log_messages.append(result.stderr)
+                    return {'status': 'error', 'log': log_messages}
 
-        # Create zip file
-        try:
+            # Create zip file
             with zipfile.ZipFile('processed_files.zip', 'w') as zipf:
                 for root, dirs, files in os.walk('output'):
                     for file in files:
                         file_path = os.path.join(root, file)
                         arcname = os.path.relpath(file_path, 'output')
                         zipf.write(file_path, arcname)
-            log_messages.append("✓ Files packaged successfully")
+
+            log_messages.append("All processing complete. Files ready for download.")
+            return {'status': 'success', 'log': log_messages}
+
         except Exception as e:
-            error_msg = f"Error creating zip file: {str(e)}"
-            logger.error(error_msg)
-            return {'status': 'error', 'log': log_messages + [error_msg]}
+            log_messages.append(f"Error: {str(e)}")
+            return {'status': 'error', 'log': log_messages}
 
-        logger.info("Processing completed successfully")
-        return {'status': 'success', 'log': log_messages + ["All processing complete. Files ready for download."]}
-
-    except Exception as e:
-        error_msg = f"Unexpected error: {str(e)}"
-        logger.error(error_msg)
-        return {'status': 'error', 'log': log_messages + [error_msg]}
+    return {'status': 'error', 'log': ['Invalid file type']}
 
 @app.route('/download')
 def download():
-    try:
-        if os.path.exists('processed_files.zip'):
-            return send_file('processed_files.zip', 
-                           as_attachment=True,
-                           download_name='processed_files.zip',
-                           mimetype='application/zip')
-        else:
-            return {'status': 'error', 'message': 'Processing not complete yet'}, 404
-    except Exception as e:
-        logging.error(f"Download error: {str(e)}")
-        return {'status': 'error', 'message': 'Error during download'}, 500
-
-@app.route('/files/<path:filename>')
-def serve_file(filename):
-    try:
-        return send_from_directory('output', filename)
-    except Exception as e:
-        return {'status': 'error', 'message': f'File {filename} not found'}, 404
+    return send_file('processed_files.zip', as_attachment=True)
 
 if __name__ == '__main__':
-    # Initialize directories
-    for directory in ['input', 'output', 'static', 'templates']:
-        os.makedirs(directory, exist_ok=True)
-    
-    # Configure app for production
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-    app.config['UPLOAD_FOLDER'] = 'input'
-    app.config['OUTPUT_FOLDER'] = 'output'
-    
-    # Run with production settings
-    app.run(host='0.0.0.0', port=8080, debug=False, threaded=True)
+    app.run(host='0.0.0.0', port=8080)
