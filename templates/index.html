@@ -212,7 +212,7 @@
                 <input type="file" id="file-input" accept=".csv">
             </div>
             <div id="progress-bar"></div>
-            <div id="log-output"></div>
+            <div id="log-output" style="display: none; white-space: pre-wrap; font-family: monospace; margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 4px;"></div>
             <div class="button-group">
                 <button id="download-btn" class="primary-button">Download All Files</button>
                 <button id="download-output-btn" class="secondary-button" style="display: none;">Download Output Files</button>
@@ -268,6 +268,11 @@
             fetch('/upload', {
                 method: 'POST',
                 body: formData
+            }).then(async response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
             })
             .then(async response => {
                 if (!response.ok) {
