@@ -27,17 +27,14 @@ if not os.path.exists('templates'):
     os.makedirs('templates')
 
 @app.route('/')
+def index():
+    return render_template('index.html')
+
 @app.route('/about')
 @app.route('/about/')
 @app.route('/portfolio')
 @app.route('/portfolio/')
 def about():
-    return render_template('about.html')
-
-@app.route('/tool')
-def index():
-    logger.debug(f"Template folder: {app.template_folder}")
-    logger.debug(f"Looking for about.html in: {os.path.join(app.template_folder, 'about.html')}")
     return render_template('about.html')
 
 
