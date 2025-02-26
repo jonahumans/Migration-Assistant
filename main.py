@@ -39,6 +39,11 @@ def about():
     logger.debug(f"Looking for about.html in: {os.path.join(app.template_folder, 'about.html')}")
     return render_template('about.html')
 
+@app.route('/report')
+@app.route('/report/')
+def report():
+    return render_template('report.html')
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
