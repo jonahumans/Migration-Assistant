@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, send_file
 import os
 import shutil
@@ -88,4 +89,4 @@ def download():
     return send_file('processed_files.zip', as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=False)
+    app.run(host='0.0.0.0', port=8080, debug=False)
