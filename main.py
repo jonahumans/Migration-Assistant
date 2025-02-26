@@ -153,10 +153,23 @@ def download():
 
 @app.errorhandler(Exception)
 def handle_error(e):
+    error_msg = str(e)
+    status_code = getattr(e, 'code', 500)
+    
+    # Log the error for debugging
+    logging.error(f"Error occurred: {error_msg}")
+    
+    if status_code == 413:
+        error_msg = "File too large. Please upload a smaller file."
+    elif status_code == 404:
+        error_msg = "Resource not found."
+    elif status_code == 400:
+        error_msg = "Invalid request. Please check your input."
+    
     return {
         'status': 'error',
-        'log': [str(e)]
-    }, 500
+        'log': [error_msg]
+    }, status_code
 
 if __name__ == '__main__':
     # Get port from environment variable or default to 8080
