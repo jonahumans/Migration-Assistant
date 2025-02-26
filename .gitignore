@@ -1,13 +1,22 @@
-# Ignore everything
-*
-
-# But not these files
-!.gitignore
-!main.py
-!addvariants.py
-!parentattributesonvarients.py
-!variantattributes.py
 
 # Python cache files
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Project specific
+processed_files.zip
+.env
+*.key
+*.pem
+credentials.json
+
+# Input/Output directories
+input/*
+output/*
+!input/.gitkeep
+!output/.gitkeep
+
+# System files
+.DS_Store
+Thumbs.db
