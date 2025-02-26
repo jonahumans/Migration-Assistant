@@ -95,5 +95,17 @@ def upload_file():
 def download():
     return send_file('processed_files.zip', as_attachment=True)
 
+@app.route('/download_output')
+def download_output():
+    output_files = ['output/group_skus.csv', 'output/parent_columns.txt', 'output/parents.csv']
+    
+    # Create a zip of just the output files
+    with zipfile.ZipFile('output_files.zip', 'w') as zipf:
+        for file in output_files:
+            if os.path.exists(file):
+                zipf.write(file, os.path.basename(file))
+    
+    return send_file('output_files.zip', as_attachment=True)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)

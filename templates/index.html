@@ -165,6 +165,26 @@
         #download-btn:hover {
             background: rgba(100, 255, 218, 0.1);
         }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .primary-button, .secondary-button {
+            background: transparent;
+            border: 1px solid var(--highlight-color);
+            color: var(--highlight-color);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .primary-button:hover, .secondary-button:hover {
+            background: rgba(100, 255, 218, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -191,7 +211,10 @@
             </div>
             <div id="progress-bar"></div>
             <div id="log-output"></div>
-            <button id="download-btn">Download Processed Files</button>
+            <div class="button-group">
+                <button id="download-btn" class="primary-button">Download All Files</button>
+                <button id="download-output-btn" class="secondary-button" style="display: none;">Download Output Files</button>
+            </div>
         </div>
 
         <div class="step">
@@ -233,8 +256,13 @@
         const progressBar = document.getElementById('progress-bar');
         const logOutput = document.getElementById('log-output');
         const downloadBtn = document.getElementById('download-btn');
+        const downloadOutputBtn = document.getElementById('download-output-btn');
 
         uploadArea.addEventListener('click', () => fileInput.click());
+
+        downloadOutputBtn.addEventListener('click', () => {
+            window.location.href = '/download_output';
+        });
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.style.background = 'rgba(100, 255, 218, 0.1)';
@@ -274,8 +302,8 @@
                 progressBar.style.width = '100%';
                 logOutput.textContent = data.log.join('\n');
                 if (data.status === 'success') {
-                    logOutput.textContent += '\nStarting download...';
-                    window.location.href = '/download';
+                    downloadOutputBtn.style.display = 'inline-block';
+                    logOutput.textContent += '\nProcessing complete! You can now download the files.';
                 }
             })
             .catch(error => {
