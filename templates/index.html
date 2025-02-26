@@ -274,8 +274,8 @@
                 }
                 return response.json();
             })
-            .then(async response => {
-                if (!response.ok) {
+            .then(data => {
+                progressBar.style.width = '100%';
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 try {
@@ -293,7 +293,11 @@
                 }
             })
             .catch(error => {
-                logOutput.textContent = 'Error: ' + error;
+                progressBar.style.width = '0%';
+                logOutput.style.display = 'block';
+                logOutput.textContent = 'Error: ' + error.message;
+                processButton.disabled = false;
+                processButton.textContent = 'Process';
             });
         }
 
