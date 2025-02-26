@@ -6,10 +6,10 @@ import subprocess
 
 app = Flask(__name__)
 
-# Set absolute paths for templates and static files
-current_dir = os.path.dirname(os.path.abspath(__file__))
-app.template_folder = os.path.join(current_dir, 'templates')
-app.static_folder = os.path.join(current_dir, 'static')
+# Set template and static folders relative to app root
+app = Flask(__name__, 
+            template_folder='templates',
+            static_folder='static')
 
 # Enable debug logging
 import logging
