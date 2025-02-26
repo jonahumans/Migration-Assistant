@@ -172,6 +172,11 @@ Learning*.pdf
 Pasted*.txt
 processed_files.zip
 generated-icon.png
+.env
+*.key
+*.pem
+credentials.json
+private/
 
 # Temporary files
 input/*
