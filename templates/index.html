@@ -275,7 +275,7 @@
                 progressBar.style.width = '100%';
                 logOutput.textContent = data.log.join('\n');
                 if (data.status === 'success') {
-                    downloadBtn.style.display = 'inline-block';
+                    window.location.href = '/download';
                 }
             })
             .catch(error => {
