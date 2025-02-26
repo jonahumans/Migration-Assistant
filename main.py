@@ -20,6 +20,10 @@ if not os.path.exists('templates'):
 def index():
     return render_template('index.html')
 
+@app.route('/portfolio')
+def portfolio():
+    return render_template('portfolio.html')
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
