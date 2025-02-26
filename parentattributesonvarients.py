@@ -83,14 +83,12 @@ def link_parent_child(df):
 
 def clean_sku_and_barcode(df):
     logging.info("Cleaning 'variant.sku' column")
-    df = df[df['variant.sku'].notna() & (df['variant.sku'] != '')]
-    duplicated_skus_df = df[df['variant.sku'].duplicated(keep=False)].copy()
-    if not duplicated_skus_df.empty:
-        error_file = os.path.join(output_directory, 'duplicates.csv')
-        duplicated_skus_df.to_csv(error_file, index=False)
-        logging.info(f"Duplicate SKUs saved to {error_file}")
-    # Keep first occurrence in main df
-    df = df[~df['variant.sku'].duplicated(keep='first')]
+    df = df[df['variant.sku'].notna() & (df['variant.sku'] != '')]  # Drop empty 'variant.sku'
+    duplicated_skus = df['variant.sku'].dropna()[df['variant.sku'].duplicated(keep=False)]
+    if not duplicated_skus.empty:
+        logging.error("Duplicates found in 'variant.sku'. Please contact management!")
+        logging.error(f"Duplicated 'variant.sku' values: {duplicated_skus.unique()}")
+        exit(1)
 
     df = df.rename(columns={'variant.sku': 'sku'})
     columns_to_export = [col for col in df.columns if col != 'sku' and col != 'brand' and col != 'description']
