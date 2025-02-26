@@ -106,11 +106,17 @@ def download():
         'output/parentattributesonvarients.csv'
     ]
     
-    # Create a zip of all files
+    # Create a zip of available files
     with zipfile.ZipFile('output_files.zip', 'w') as zipf:
+        files_found = False
         for file in output_files:
             if os.path.exists(file):
                 zipf.write(file, os.path.basename(file))
+                files_found = True
+        
+        # If no files were found, add a README
+        if not files_found:
+            zipf.writestr('README.txt', 'No output files were generated during processing.')
     
     # Force cleanup of all files
     for directory in ['input', 'output']:
