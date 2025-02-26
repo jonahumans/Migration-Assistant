@@ -110,6 +110,17 @@ def download():
             if os.path.exists(file):
                 zipf.write(file, os.path.basename(file))
     
+    # Clean up input and output directories
+    for directory in ['input', 'output']:
+        for file in os.listdir(directory):
+            file_path = os.path.join(directory, file)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    logging.info(f"Deleted {file_path}")
+            except Exception as e:
+                logging.error(f"Error deleting {file_path}: {e}")
+    
     return send_file('output_files.zip', as_attachment=True)
 
 @app.errorhandler(Exception)
