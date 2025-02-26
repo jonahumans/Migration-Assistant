@@ -121,7 +121,13 @@ def download():
                     os.remove(file_path)
                     logging.info(f"Deleted {file_path}")
             except Exception as e:
-                logging.error(f"Error deleting {file_path}: {e}")
+                # Force close any open file handles
+                import gc
+                gc.collect()
+                try:
+                    os.remove(file_path)
+                except Exception as inner_e:
+                    logging.error(f"Failed to delete {file_path}: {inner_e}")
     
     return send_file('output_files.zip', as_attachment=True)
 
