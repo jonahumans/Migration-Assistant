@@ -7,8 +7,14 @@ import subprocess
 app = Flask(__name__)
 
 # Set absolute paths for templates and static files
-app.template_folder = os.path.abspath('templates')
-app.static_folder = os.path.abspath('static')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+app.template_folder = os.path.join(current_dir, 'templates')
+app.static_folder = os.path.join(current_dir, 'static')
+
+# Enable debug logging
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Create necessary directories
 if not os.path.exists('input'):
@@ -26,6 +32,8 @@ def index():
 
 @app.route('/about')
 def about():
+    logger.debug(f"Template folder: {app.template_folder}")
+    logger.debug(f"Looking for about.html in: {os.path.join(app.template_folder, 'about.html')}")
     return render_template('about.html')
 
 @app.route('/about/')
