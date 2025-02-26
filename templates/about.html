@@ -51,17 +51,22 @@
 
         .tech-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
             margin-top: 40px;
         }
 
         .tech-item {
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             background: #112240;
             border-radius: 8px;
             transition: transform 0.3s;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .tech-item:hover {
@@ -83,12 +88,14 @@
         .experience-card {
             perspective: 1000px;
             background: transparent;
+            margin-bottom: 30px;
+            min-height: 300px;
         }
 
         .card-inner {
             position: relative;
             width: 100%;
-            height: 100%;
+            height: 300px;
             text-align: center;
             transition: transform 0.8s;
             transform-style: preserve-3d;
@@ -107,6 +114,10 @@
             padding: 2rem;
             background: #112240;
             border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
         }
 
         .card-back {
