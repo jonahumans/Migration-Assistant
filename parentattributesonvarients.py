@@ -28,7 +28,9 @@ def clean_parents(parents, children):
     parents_with_multiple_children = parents[parents['id'].isin(parent_child_count[parent_child_count > 1].index)]
     parents = parents_with_multiple_children.copy()
     parents.loc[:, 'sku'] = 'variant-' + parents['id'].astype(int).astype(str)
-    parents = parents.drop(columns=['variant.sku', 'target_enabled', 'id', 'variant.product_id'])
+    columns_to_drop = ['variant.sku', 'target_enabled', 'id', 'variant.product_id']
+    existing_columns = [col for col in columns_to_drop if col in parents.columns]
+    parents = parents.drop(columns=existing_columns)
     columns = ['sku'] + [col for col in parents.columns if col != 'sku']
     parents = parents[columns]
     
