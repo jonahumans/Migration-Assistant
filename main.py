@@ -120,9 +120,16 @@ def upload_file():
 @app.route('/download')
 def download():
     try:
-        return send_file('processed_files.zip', as_attachment=True)
+        if os.path.exists('processed_files.zip'):
+            return send_file('processed_files.zip', 
+                           as_attachment=True,
+                           download_name='processed_files.zip',
+                           mimetype='application/zip')
+        else:
+            return {'status': 'error', 'message': 'Processing not complete yet'}, 404
     except Exception as e:
-        return {'status': 'error', 'message': 'File not found or processing incomplete'}, 404
+        logging.error(f"Download error: {str(e)}")
+        return {'status': 'error', 'message': 'Error during download'}, 500
 
 @app.route('/files/<path:filename>')
 def serve_file(filename):
