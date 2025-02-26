@@ -133,7 +133,17 @@ def download():
                 except:
                     pass
     
-    return send_file('output_files.zip', as_attachment=True)
+    # Send the zip file
+    response = send_file('output_files.zip', as_attachment=True)
+    
+    # Force cleanup of zip file
+    try:
+        os.remove('output_files.zip')
+        logging.info("Deleted output_files.zip")
+    except Exception as e:
+        logging.error(f"Failed to delete output_files.zip: {e}")
+        
+    return response
 
 @app.errorhandler(Exception)
 def handle_error(e):
