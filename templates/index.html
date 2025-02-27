@@ -331,23 +331,16 @@
                 currentLogOutput.textContent = "Processing with standard format...";
             }
 
-            // Add try-catch around the fetch operation
-            try {
-                fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-            } catch (error) {
-                console.error("Error in fetch operation:", error);
-                currentLogOutput.textContent = "Error: " + error.message;
-                currentProgressBar.style.width = '0%';
-            }
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 currentProgressBar.style.width = '100%';
                 currentLogOutput.textContent = data.log.join('\n');
