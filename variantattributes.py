@@ -41,11 +41,9 @@ def select_required_columns(df):
     df.columns = df.columns.str.strip()
 
     #Get location of variant.package_height
-    start_index = df.columns.get_loc('variant.package_height')  # Get the index of 'variant.weight' column
+    start_index = df.columns.get_loc('variant.package_height')  # Get the index of 'variant.package_height' column
     
-   
-
-    # Add 'variant.sku', 'brand', 'description', 'id', and 'variant.product_id' to the columns to be selected
+    # Add 'variant.sku', 'variant.weight' and package-related columns
     columns_to_keep = ['variant.sku', 'variant.weight'] + list(df.columns[start_index:])
 
     # Select the columns
@@ -60,7 +58,6 @@ def select_required_columns(df):
     # Remove columns with all NaN or empty values
     df = df.dropna(axis=1, how='all')  # Drop columns with all NaN values
     df = df.loc[:, df.notna().any(axis=0)]  # Keep columns with at least one non-NaN value
-
 
     return df
 
@@ -77,6 +74,15 @@ def rename_columns(df):
         'fields.' + col[8:] if col.startswith('variant.') else col
         for col in df.columns
     ]
+    
+    # After renaming, check if we have duplicate weight columns and remove the one without .value
+    weight_columns = [col for col in df.columns if 'weight' in col and '.value' not in col]
+    for col in weight_columns:
+        # Check if there's a corresponding .value column
+        value_col = col + '.value'
+        if value_col in df.columns:
+            # Drop the column without .value
+            df = df.drop(columns=[col])
     
     return df
 
