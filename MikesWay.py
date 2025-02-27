@@ -58,6 +58,10 @@ def process_mikes_way(input_file):
             # Combine parent and variant rows
             result_df = pd.concat([parent_rows, variant_rows], ignore_index=True)
 
+            # Reorder columns to put group_skus.0 at the front if it exists
+            if 'group_skus.0' in result_df.columns:
+                cols = ['group_skus.0'] + [col for col in result_df.columns if col != 'group_skus.0']
+                result_df = result_df[cols]
 
             # Save to MikesWay.csv
             output_file = os.path.join(output_dir, 'MikesWay.csv')
