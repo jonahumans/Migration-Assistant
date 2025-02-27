@@ -81,12 +81,12 @@ def process_mikes_way(input_file):
             # Combine parent and variant rows
             result_df = pd.concat([parent_rows, variant_rows], ignore_index=True)
 
-            # Reorder columns to put group_skus.0 at the front, followed by sku
+            # Reorder columns to put group_skus.0 immediately after sku column
             if 'group_skus.0' in result_df.columns and 'sku' in result_df.columns:
                 # Get all columns except sku and group_skus.0
                 other_cols = [col for col in result_df.columns if col != 'sku' and col != 'group_skus.0']
-                # Reorder with group_skus.0 first, then sku, then all other columns
-                cols = ['group_skus.0', 'sku'] + other_cols
+                # Reorder with sku first, then group_skus.0, then all other columns
+                cols = ['sku', 'group_skus.0'] + other_cols
                 result_df = result_df[cols]
 
             # Save to MikesWay.csv
