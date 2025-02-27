@@ -51,7 +51,11 @@ def select_required_columns(df):
     # Select the columns
     df = df[columns_to_keep]
 
-    df = df.drop(columns=['variant.weight.1', 'variant.target_enabled', 'variant.target_listing_action'])
+    # Only drop columns if they exist in the DataFrame
+    columns_to_drop = ['variant.target_listing_action']
+    existing_columns_to_drop = [col for col in columns_to_drop if col in df.columns]
+    if existing_columns_to_drop:
+        df = df.drop(columns=existing_columns_to_drop)
 
     # Remove columns with all NaN or empty values
     df = df.dropna(axis=1, how='all')  # Drop columns with all NaN values
