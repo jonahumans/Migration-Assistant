@@ -58,6 +58,37 @@ def main():
     # Remove duplicate SKUs, keeping the first occurrence
     target_df = target_df.drop_duplicates(subset=['sku'], keep='first')
     
+    # Create a new 'pts' column with deduplicated target_posting_templates
+    logging.info("Creating 'pts' column with deduplicated target_posting_templates")
+    
+    # Create a copy of the target_posting_template column for the pts column
+    if 'fields.target_posting_template' in target_df.columns:
+        target_df['pts'] = target_df['fields.target_posting_template']
+        
+        # Remove duplicates by creating a set of unique values for each cell
+        def dedup_templates(value):
+            if pd.isna(value) or value == '':
+                return value
+            try:
+                # Try to split by comma if it's a string with multiple values
+                templates = [t.strip() for t in str(value).split(',')]
+                # Remove duplicates by converting to set and back to list
+                unique_templates = list(dict.fromkeys(templates))
+                return ','.join(unique_templates)
+            except:
+                return value
+        
+        target_df['pts'] = target_df['pts'].apply(dedup_templates)
+    else:
+        # If the column doesn't exist, create an empty pts column
+        target_df['pts'] = ''
+    
+    # Reorder columns to place 'pts' as the fourth column
+    cols = list(target_df.columns)
+    cols.remove('pts')
+    new_cols = cols[:3] + ['pts'] + cols[3:]
+    target_df = target_df[new_cols]
+    
     # Save the output
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
