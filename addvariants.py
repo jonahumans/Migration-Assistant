@@ -78,10 +78,22 @@ def rename_columns(df):
     logging.info("Renaming columns to match the required format")
     # First rename the columns
     df = df.rename(columns={
+        'variant.name': 'name',
+        'variant.sku': 'sku',
         'variant.barcode': 'upc',
-        'variant.price': 'pricing_item.price',
-        'variant.compare_price': 'pricing_item.msrp.amount'
+        'variant.price': 'pricing_item.price.amount',
+        'variant.compare_price': 'pricing_item.msrp.amount',
+        'mainimage': 'main'
     })
+    
+    # Rename all alt columns to the format images.default.#.alternate.url
+    alt_columns = [col for col in df.columns if col.startswith('alt')]
+    for col in alt_columns:
+        # Extract the number from the alt column name (e.g., alt1 -> 1)
+        num = ''.join(filter(str.isdigit, col))
+        new_col_name = f'images.default.{num}.alternate.url'
+        df = df.rename(columns={col: new_col_name})
+    
     # Make sure UPC values are preserved and not converted to NaN
     df['upc'] = df['upc'].astype(str).replace('nan', '')
     return df
