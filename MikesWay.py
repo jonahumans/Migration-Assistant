@@ -1,4 +1,3 @@
-
 import os
 import pandas as pd
 import logging
@@ -70,7 +69,7 @@ def process_mikes_way(input_file):
                 if 'variant.sku' in variant_rows.columns:
                     variant_rows['barcode'] = variant_rows['variant.sku'].apply(lambda x: ''.join(filter(str.isalnum, str(x))))
                     parent_row['barcode'] = 'variant-' + str(int(parent_id))
-                
+
                 # Combine parent and variants, with parent first
                 try:
                     # Reset index to avoid conflicts
@@ -97,60 +96,78 @@ def process_mikes_way(input_file):
                 parent_attrs_path = os.path.join(output_dir, 'parentattributesonvarients.csv')
                 parents_path = os.path.join(output_dir, 'parents.csv')
                 variant_attrs_path = os.path.join(output_dir, 'variantattributes.csv')
-                
+
                 if all(os.path.exists(p) for p in [group_skus_path, parent_attrs_path, parents_path, variant_attrs_path]):
                     # Load the data
                     group_skus_df = pd.read_csv(group_skus_path)
                     parent_attrs_df = pd.read_csv(parent_attrs_path)
                     parents_df = pd.read_csv(parents_path)
                     variant_attrs_df = pd.read_csv(variant_attrs_path)
-                    
+
                     # Start with parent_attrs_df as the base dataframe
                     result_df = parent_attrs_df.copy()
-                    
+
                     # Add group_skus information
                     result_df = pd.merge(result_df, group_skus_df, on='sku', how='left')
-                    
+
                     # Add variant attributes
                     result_df = pd.merge(result_df, variant_attrs_df, on='sku', how='left')
-                    
+
                     # Add barcode column
                     result_df['barcode'] = result_df['sku'].apply(lambda x: ''.join(filter(str.isalnum, str(x))))
-                    
+
                     # Add group column
                     result_df['group'] = 'variant'
-                    
+
                     # Add parent rows
                     parent_rows = parents_df.copy()
                     parent_rows['group'] = 'product'
                     parent_rows['barcode'] = parent_rows['sku'].apply(lambda x: ''.join(filter(str.isalnum, str(x))))
-                    
+
                     # Combine parent and variant rows
                     result_df = pd.concat([parent_rows, result_df], ignore_index=True)
-                    
+
                 else:
                     # Just copy the input file if we can't merge
                     result_df = df.copy()
-                    
-                    # Add group column
+
+                    # Replace status column with variant.sku and name it "variant"
+                    if 'status' in result_df.columns:
+                        result_df.drop('status', axis=1, inplace=True, errors='ignore')
+
+                    # Add variant column based on available SKU field
+                    if 'variant.sku' in result_df.columns:
+                        result_df['variant'] = result_df['variant.sku']
+                    elif 'sku' in result_df.columns:
+                        result_df['variant'] = result_df['sku']
+
+                    # Add group column - determine product type if possible, otherwise default to variant
                     if 'group' not in result_df.columns:
-                        result_df['group'] = 'variant'
-                    
+                        if 'variant.product_id' in result_df.columns:
+                            # If it has a product_id, it's a variant
+                            result_df['group'] = 'variant'
+                            # Identify potential parent rows
+                            if 'id' in result_df.columns:
+                                parents_mask = result_df['id'].isin(result_df['variant.product_id'])
+                                result_df.loc[parents_mask, 'group'] = 'product'
+                        else:
+                            result_df['group'] = 'variant'
+
                     # Add barcode column
                     if 'variant.sku' in result_df.columns:
                         result_df['barcode'] = result_df['variant.sku'].apply(lambda x: ''.join(filter(str.isalnum, str(x))))
                     elif 'sku' in result_df.columns:
                         result_df['barcode'] = result_df['sku'].apply(lambda x: ''.join(filter(str.isalnum, str(x))))
-            
+
             except Exception as e:
                 logging.error(f"Error merging existing data: {str(e)}")
                 # Just copy the input file as fallback
                 result_df = df.copy()
-                
+
                 # Add group column
                 if 'group' not in result_df.columns:
                     result_df['group'] = 'variant'
-                
+
                 # Add barcode column
                 if 'variant.sku' in result_df.columns:
                     result_df['barcode'] = result_df['variant.sku'].apply(lambda x: ''.join(filter(str.isalnum, str(x))))

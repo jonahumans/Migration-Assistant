@@ -51,6 +51,11 @@ def generate_mikesway_csv():
         parent_rows['group'] = 'product'
         parent_rows['barcode'] = parent_rows['sku']
         
+        # Add variant column (replacing status if it exists)
+        if 'status' in parent_rows.columns:
+            parent_rows.drop('status', axis=1, inplace=True, errors='ignore')
+        parent_rows['variant'] = parent_rows['sku']
+        
         # Prepare variant rows
         variant_rows = parent_attrs_df.copy()
         
@@ -62,6 +67,11 @@ def generate_mikesway_csv():
         
         # Add barcode column
         variant_rows['barcode'] = variant_rows['sku'].apply(lambda x: ''.join(filter(str.isalnum, str(x))))
+        
+        # Replace status column with sku and name it "variant"
+        if 'status' in variant_rows.columns:
+            variant_rows.drop('status', axis=1, inplace=True, errors='ignore')
+        variant_rows['variant'] = variant_rows['sku']
         
         # Add group column
         variant_rows['group'] = 'variant'
