@@ -122,11 +122,34 @@ def process_mikes_way(input_file):
                         lambda x: f"{parent_name}, {x.split(' - ')[1]}" if ' - ' in x else x
                     )
                 
-                # Combine parent and variants, with parent first
-                combined = pd.concat([parent_row, variant_rows], ignore_index=True)
+                # Check for and handle duplicate column names before concatenation
+                parent_cols = set(parent_row.columns)
+                variant_cols = set(variant_rows.columns)
                 
-                # Add to result
-                result_df = pd.concat([result_df, combined], ignore_index=True)
+                # Log duplicate columns for debugging
+                logging.info(f"Parent columns: {len(parent_cols)}, Variant columns: {len(variant_cols)}")
+                
+                # Ensure unique indexing before concatenation
+                parent_row_copy = parent_row.copy()
+                variant_rows_copy = variant_rows.copy()
+                
+                # Ensure index is unique across both dataframes
+                if not parent_row_copy.index.is_unique:
+                    parent_row_copy = parent_row_copy.reset_index(drop=True)
+                if not variant_rows_copy.index.is_unique:
+                    variant_rows_copy = variant_rows_copy.reset_index(drop=True)
+                
+                # Combine parent and variants, with parent first
+                try:
+                    combined = pd.concat([parent_row_copy, variant_rows_copy], ignore_index=True)
+                    
+                    # Add to result
+                    result_df = pd.concat([result_df, combined], ignore_index=True)
+                except Exception as e:
+                    logging.error(f"Concatenation error: {str(e)}")
+                    logging.error(f"Parent row shape: {parent_row_copy.shape}, Variant rows shape: {variant_rows_copy.shape}")
+                    # Proceed without this batch to avoid complete failure
+                    continue
                 
             # Handle case where dataframe is still empty
             if result_df.empty:
