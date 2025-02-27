@@ -39,6 +39,18 @@ def process_mikes_way(input_file):
             input_file_path = os.path.join('./input', os.listdir('./input')[0])
             original_df = pd.read_csv(input_file_path)
 
+            # Load addvariants.csv to get pricing data in correct format
+            addvariants_path = os.path.join(output_dir, 'addvariants.csv')
+            if os.path.exists(addvariants_path):
+                addvariants_df = pd.read_csv(addvariants_path)
+                logging.info(f"Loaded addvariants.csv: {len(addvariants_df)} rows")
+                
+                # Create mapping for pricing data
+                pricing_map = addvariants_df[['sku', 'pricing_item.price.amount', 'pricing_item.msrp.amount']].dropna(subset=['sku'])
+            else:
+                logging.warning("addvariants.csv not found, pricing data may be missing")
+                pricing_map = pd.DataFrame(columns=['sku', 'pricing_item.price.amount', 'pricing_item.msrp.amount'])
+
             # Create a mapping dataframe with sku, variant.name, and variant.barcode
             name_barcode_map = original_df[['variant.sku', 'variant.name', 'variant.barcode']].dropna(subset=['variant.sku'])
             name_barcode_map = name_barcode_map.rename(columns={'variant.sku': 'sku'})
@@ -57,10 +69,14 @@ def process_mikes_way(input_file):
             # Add variant attributes
             variant_rows = pd.merge(variant_rows, variant_attrs_df, on='sku', how='left')
 
-            # Add name and barcode from original data
+            # Add name, barcode, and pricing from original data and addvariants
             # For variant rows
             variant_rows = pd.merge(variant_rows, name_barcode_map[['sku', 'variant.name', 'variant.barcode']], 
                                   on='sku', how='left')
+            # Add pricing data
+            variant_rows = pd.merge(variant_rows, pricing_map, 
+                                  on='sku', how='left')
+            
             variant_rows['barcode'] = variant_rows['variant.barcode']
             # Ensure we use the variant.name from the input file for unique product names
             variant_rows['name'] = variant_rows['variant.name']
@@ -70,6 +86,10 @@ def process_mikes_way(input_file):
             # For parent rows (will use sku as barcode if no match found)
             parent_rows = pd.merge(parent_rows, name_barcode_map[['sku', 'variant.name', 'variant.barcode']], 
                                  on='sku', how='left')
+            # Add pricing data to parent rows
+            parent_rows = pd.merge(parent_rows, pricing_map, 
+                                 on='sku', how='left')
+                                 
             parent_rows['barcode'] = parent_rows['variant.barcode'].fillna(parent_rows['sku'])
             # Ensure parent rows also use the correct name from the input file
             parent_rows['name'] = parent_rows['variant.name'].fillna(parent_rows['fields.name'])
