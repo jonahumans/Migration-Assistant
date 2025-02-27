@@ -51,9 +51,27 @@ def process_mikes_way(input_file):
                 logging.warning("addvariants.csv not found, pricing data may be missing")
                 pricing_map = pd.DataFrame(columns=['sku', 'pricing_item.price.amount', 'pricing_item.msrp.amount'])
 
-            # Create a mapping dataframe with sku, variant.name, and variant.barcode
-            name_barcode_map = original_df[['variant.sku', 'variant.name', 'variant.barcode']].dropna(subset=['variant.sku'])
+            # Create a mapping dataframe with sku, variant.name, variant.barcode, and variant.images
+            name_barcode_map = original_df[['variant.sku', 'variant.name', 'variant.barcode', 'variant.images']].dropna(subset=['variant.sku'])
             name_barcode_map = name_barcode_map.rename(columns={'variant.sku': 'sku'})
+            
+            # Process images from the original data
+            # Split images into mainimage and alt columns
+            name_barcode_map['variant.images'] = name_barcode_map['variant.images'].fillna('')
+            name_barcode_map['images_list'] = name_barcode_map['variant.images'].str.split(',')
+            
+            # Create columns for main image and alternates
+            max_images = name_barcode_map['images_list'].apply(lambda x: len(x) if isinstance(x, list) else 0).max()
+            image_columns = ['main'] + [f'images.default.{i}.alternate.url' for i in range(1, max_images)]
+            
+            # Fill in image columns
+            for i, col in enumerate(image_columns):
+                name_barcode_map[col] = name_barcode_map['images_list'].apply(
+                    lambda x: x[i].strip() if isinstance(x, list) and i < len(x) and x[i].strip() != '' else None
+                )
+            
+            # Drop temporary columns
+            name_barcode_map = name_barcode_map.drop(columns=['images_list', 'variant.images'])
 
             # Create parent rows
             parent_rows = parents_df.copy()
@@ -71,7 +89,11 @@ def process_mikes_way(input_file):
 
             # Add name, barcode, and pricing from original data and addvariants
             # For variant rows
-            variant_rows = pd.merge(variant_rows, name_barcode_map[['sku', 'variant.name', 'variant.barcode']], 
+            # Get all image columns
+            image_cols = [col for col in name_barcode_map.columns if col == 'main' or col.startswith('images.default')]
+            merge_cols = ['sku', 'variant.name', 'variant.barcode'] + image_cols
+            
+            variant_rows = pd.merge(variant_rows, name_barcode_map[merge_cols], 
                                   on='sku', how='left')
             # Add pricing data
             variant_rows = pd.merge(variant_rows, pricing_map, 
@@ -84,7 +106,11 @@ def process_mikes_way(input_file):
             variant_rows = variant_rows.drop(['variant.name', 'variant.barcode'], axis=1, errors='ignore')
 
             # For parent rows (will use sku as barcode if no match found)
-            parent_rows = pd.merge(parent_rows, name_barcode_map[['sku', 'variant.name', 'variant.barcode']], 
+            # Get all image columns
+            image_cols = [col for col in name_barcode_map.columns if col == 'main' or col.startswith('images.default')]
+            merge_cols = ['sku', 'variant.name', 'variant.barcode'] + image_cols
+            
+            parent_rows = pd.merge(parent_rows, name_barcode_map[merge_cols], 
                                  on='sku', how='left')
             # Add pricing data to parent rows
             parent_rows = pd.merge(parent_rows, pricing_map, 
