@@ -103,6 +103,7 @@ def upload_file():
 def download():
     output_files = [
         'input/processed_data.csv',
+        'output/addvariants.csv',
         'output/group_skus.csv', 
         'output/parent_columns.txt',
         'output/parents.csv',
