@@ -69,7 +69,7 @@ def upload_file():
 
         log_messages = []
         try:
-            scripts = ["addvariants.py", "parentattributesonvarients.py", "variantattributes.py"]
+            scripts = ["addvariants.py", "parentattributesonvarients.py", "variantattributes.py", "target_pts.py"]
             for script in scripts:
                 log_messages.append(f"Running {script}...")
                 result = subprocess.run(['python', script], capture_output=True, text=True)
@@ -109,7 +109,8 @@ def download():
         'output/parents.csv',
         'output/variant_columns.txt',
         'output/variantattributes.csv',
-        'output/parentattributesonvarients.csv'
+        'output/parentattributesonvarients.csv',
+        'output/target_pts.csv'
     ]
     
     # Create a zip of available files
