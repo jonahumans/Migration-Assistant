@@ -72,6 +72,12 @@
         .step-title {
             color: var(--highlight-color);
             font-size: 20px;
+
+            <p id="mikes-way-option" style="margin-top: 10px;">
+                <input type="checkbox" id="use-mikes-way" name="use-mikes-way">
+                <label for="use-mikes-way">Do you want your Product Spreadsheet Mike's Way?</label>
+            </p>
+
             margin-bottom: 15px;
         }
 
@@ -259,6 +265,9 @@
         function handleFile(file) {
             const formData = new FormData();
             formData.append('file', file);
+            // Add Mike's Way option if checked
+            const useMikesWay = document.getElementById('use-mikes-way').checked;
+            formData.append('use_mikes_way', useMikesWay.toString());
 
             progressBar.style.width = '0%';
             logOutput.style.display = 'block';

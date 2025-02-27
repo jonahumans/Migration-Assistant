@@ -51,6 +51,7 @@ def upload_file():
         if 'file' not in request.files:
             return {'status': 'error', 'log': ['No file uploaded']}, 400
         file = request.files['file']
+        use_mikes_way = request.form.get('use_mikes_way') == 'true'
     except Exception as e:
         return {'status': 'error', 'log': [str(e)]}, 400
         
@@ -81,6 +82,18 @@ def upload_file():
                     log_messages.append(f"✗ Error in {script}:")
                     log_messages.append(result.stderr)
                     return {'status': 'error', 'log': log_messages}
+            
+            # Run Mike's Way processing if selected
+            if use_mikes_way:
+                log_messages.append("Running Mike's Way processing...")
+                try:
+                    import MikesWay
+                    if MikesWay.process_mikes_way(file_path):
+                        log_messages.append("✓ Mike's Way processing completed successfully.")
+                    else:
+                        log_messages.append("✗ Error in Mike's Way processing.")
+                except Exception as e:
+                    log_messages.append(f"✗ Error in Mike's Way processing: {str(e)}")
 
             # Create zip file
             with zipfile.ZipFile('processed_files.zip', 'w') as zipf:
