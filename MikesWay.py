@@ -264,6 +264,11 @@ def process_mikes_way(input_file):
         result_df.to_csv(output_file, index=False)
         logging.info(f"Successfully saved Mike's Way format to {output_file}")
         
+        # Also save a copy directly in output for easy access
+        output_file_main = os.path.join('./output', 'MikesWay.csv')
+        result_df.to_csv(output_file_main, index=False)
+        logging.info(f"Also saved to {output_file_main} for direct access")
+        
         return True
         
     except Exception as e:
