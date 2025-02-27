@@ -133,7 +133,7 @@
             display: none;
         }
 
-        #progress-bar {
+        #progress-bar, #mikes-progress-bar {
             height: 4px;
             width: 0;
             background-color: var(--highlight-color);
@@ -206,11 +206,6 @@
         <div class="step">
             <div class="step-title"><span class="step-number">1</span> Upload Your Product Spreadsheet</div>
             <p>Click below to upload your CSV file with all your product information.</p>
-            <p id="mikes-way-option" style="margin-top: 10px;">
-                <input type="checkbox" id="use-mikes-way" name="use-mikes-way">
-                <label for="use-mikes-way">Do you want your Product Spreadsheet Mike's Way?</label>
-            </p>
-
             <div class="upload-area" id="upload-area">
                 <p>Drop your CSV file here or click to browse</p>
                 <input type="file" id="file-input" accept=".csv">
@@ -223,10 +218,25 @@
             </div>
         </div>
 
+        <div class="step">
+            <div class="step-title"><span class="step-number">2</span> Upload Your Product Spreadsheet Mike's Way</div>
+            <p>Click below to upload your CSV file with all your product information.</p>
+            <div class="upload-area" id="mikes-upload-area">
+                <p>Drop your CSV file here or click to browse</p>
+                <input type="file" id="mikes-file-input" accept=".csv">
+            </div>
+            <div id="mikes-progress-bar"></div>
+            <div id="mikes-log-output" style="display: none; white-space: pre-wrap; font-family: monospace; margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 4px;"></div>
+            <div class="button-group">
+                <button id="mikes-download-btn" class="primary-button" style="display: none;">Download Mike's Way Files</button>
+            </div>
+        </div>
+
 
     </div>
 
     <script>
+        // Standard upload elements
         const uploadArea = document.getElementById('upload-area');
         const fileInput = document.getElementById('file-input');
         const progressBar = document.getElementById('progress-bar');
@@ -234,43 +244,84 @@
         const downloadBtn = document.getElementById('download-btn');
         const downloadOutputBtn = document.getElementById('download-output-btn');
 
+        // Mike's Way upload elements
+        const mikesUploadArea = document.getElementById('mikes-upload-area');
+        const mikesFileInput = document.getElementById('mikes-file-input');
+        const mikesProgressBar = document.getElementById('mikes-progress-bar');
+        const mikesLogOutput = document.getElementById('mikes-log-output');
+        const mikesDownloadBtn = document.getElementById('mikes-download-btn');
+
+        // Standard file upload handlers
         uploadArea.addEventListener('click', () => fileInput.click());
 
         downloadOutputBtn.addEventListener('click', () => {
             window.location.href = '/download_output';
         });
+        
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.style.background = 'rgba(100, 255, 218, 0.1)';
         });
+        
         uploadArea.addEventListener('dragleave', () => {
             uploadArea.style.background = 'transparent';
         });
+        
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.style.background = 'transparent';
             const file = e.dataTransfer.files[0];
             if (file && file.name.endsWith('.csv')) {
-                handleFile(file);
+                handleFile(file, false);
             }
         });
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) handleFile(file);
+            if (file) handleFile(file, false);
         });
 
-        function handleFile(file) {
+        // Mike's Way file upload handlers
+        mikesUploadArea.addEventListener('click', () => mikesFileInput.click());
+        
+        mikesUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            mikesUploadArea.style.background = 'rgba(100, 255, 218, 0.1)';
+        });
+        
+        mikesUploadArea.addEventListener('dragleave', () => {
+            mikesUploadArea.style.background = 'transparent';
+        });
+        
+        mikesUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            mikesUploadArea.style.background = 'transparent';
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                handleFile(file, true);
+            }
+        });
+
+        mikesFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file, true);
+        });
+
+        // Common file handling function
+        function handleFile(file, useMikesWay) {
             const formData = new FormData();
             formData.append('file', file);
-            // Add Mike's Way option if checked
-            const useMikesWay = document.getElementById('use-mikes-way').checked;
             formData.append('use_mikes_way', useMikesWay.toString());
 
-            progressBar.style.width = '0%';
-            logOutput.style.display = 'block';
-            logOutput.textContent = 'Processing...';
-            downloadBtn.style.display = 'none';
+            // Use the appropriate UI elements based on which upload was used
+            const currentProgressBar = useMikesWay ? mikesProgressBar : progressBar;
+            const currentLogOutput = useMikesWay ? mikesLogOutput : logOutput;
+            const currentDownloadBtn = useMikesWay ? mikesDownloadBtn : downloadBtn;
+
+            currentProgressBar.style.width = '0%';
+            currentLogOutput.style.display = 'block';
+            currentLogOutput.textContent = 'Processing...';
+            currentDownloadBtn.style.display = 'none';
 
             fetch('/upload', {
                 method: 'POST',
@@ -283,27 +334,26 @@
                 return response.json();
             })
             .then(data => {
-                progressBar.style.width = '100%';
-                logOutput.textContent = data.log.join('\n');
+                currentProgressBar.style.width = '100%';
+                currentLogOutput.textContent = data.log.join('\n');
                 if (data.status === 'success') {
-                    downloadBtn.style.display = 'inline-block';
-                }
-                logOutput.textContent = data.log.join('\n');
-                if (data.status === 'success') {
-                    downloadBtn.style.display = 'inline-block';
-                    logOutput.textContent += '\nProcessing complete! Click Download to get all files.';
+                    currentDownloadBtn.style.display = 'inline-block';
+                    currentLogOutput.textContent += '\nProcessing complete! Click Download to get all files.';
                 }
             })
             .catch(error => {
-                progressBar.style.width = '0%';
-                logOutput.style.display = 'block';
-                logOutput.textContent = 'Error: ' + error.message;
-                processButton.disabled = false;
-                processButton.textContent = 'Process';
+                currentProgressBar.style.width = '0%';
+                currentLogOutput.style.display = 'block';
+                currentLogOutput.textContent = 'Error: ' + error.message;
             });
         }
 
+        // Download handlers
         downloadBtn.addEventListener('click', () => {
+            window.location.href = '/download';
+        });
+        
+        mikesDownloadBtn.addEventListener('click', () => {
             window.location.href = '/download';
         });
     </script>
