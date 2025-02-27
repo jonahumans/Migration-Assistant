@@ -1,0 +1,28 @@
+✗ Error in parentattributesonvarients.py:
+2025-02-27 00:28:08,584 - INFO - Starting data processing
+2025-02-27 00:28:08,598 - INFO - Filtering rows where 'variant.name' or 'name' contains 'Sample product'
+2025-02-27 00:28:08,600 - INFO - Selecting required columns from 'variant.sku', 'brand', 'description', and from 'material' to 'variant.id', along with 'id' and 'variant.product_id'
+2025-02-27 00:28:08,604 - INFO - Linking child rows to parent rows based on 'variant.product_id'
+Traceback (most recent call last):
+  File "/home/runner/workspace/parentattributesonvarients.py", line 219, in <module>
+    main()
+  File "/home/runner/workspace/parentattributesonvarients.py", line 206, in main
+    df = link_parent_child(df)
+         ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/parentattributesonvarients.py", line 117, in link_parent_child
+    clean_parents(parents, children)
+  File "/home/runner/workspace/parentattributesonvarients.py", line 46, in clean_parents
+    parents = parents.drop(columns=['variant.sku', 'target_enabled', 'id', 'variant.product_id'])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pandas/core/frame.py", line 5581, in drop
+    return super().drop(
+           ^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pandas/core/generic.py", line 4788, in drop
+    obj = obj._drop_axis(labels, axis, level=level, errors=errors)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pandas/core/generic.py", line 4830, in _drop_axis
+    new_axis = axis.drop(labels, errors=errors)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pandas/core/indexes/base.py", line 7070, in drop
+    raise KeyError(f"{labels[mask].tolist()} not found in axis")
+KeyError: "['target_enabled'] not found in axis"
