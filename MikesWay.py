@@ -1,3 +1,4 @@
+
 import os
 import pandas as pd
 import logging
@@ -38,11 +39,17 @@ def process_mikes_way(input_file):
             parent_rows = parents_df.copy()
             parent_rows['group'] = 'product'
 
+            # Add group_skus column to parent rows
+            parent_rows['group_skus'] = parent_rows['sku']  # Parent sku is the same as group_skus
+            
             # Create variant rows
             variant_rows = parent_attrs_df.copy()
 
             # Add group_skus information
             variant_rows = pd.merge(variant_rows, group_skus_df, on='sku', how='left')
+            
+            # Rename the group_skus.0 column to group_skus
+            variant_rows = variant_rows.rename(columns={'group_skus.0': 'group_skus'})
 
             # Add variant attributes
             variant_rows = pd.merge(variant_rows, variant_attrs_df, on='sku', how='left')
@@ -56,6 +63,11 @@ def process_mikes_way(input_file):
 
             # Combine parent and variant rows
             result_df = pd.concat([parent_rows, variant_rows], ignore_index=True)
+            
+            # Reorder columns to put group_skus at the front
+            if 'group_skus' in result_df.columns:
+                cols = ['group_skus'] + [col for col in result_df.columns if col != 'group_skus']
+                result_df = result_df[cols]
 
             # Save to MikesWay.csv
             output_file = os.path.join(output_dir, 'MikesWay.csv')
