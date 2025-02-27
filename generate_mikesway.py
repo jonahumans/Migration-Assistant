@@ -153,65 +153,6 @@ def generate_mikesway_csv():
         # Reorder columns
         result_df = result_df[priority_columns + other_columns]
         
-        # Load additional fields from variant attributes and parent attributes files
-        try:
-            variant_attrs_path = os.path.join(output_dir, 'variantattributes.csv')
-            parent_attrs_path = os.path.join(output_dir, 'parentattributesonvarients.csv')
-            
-            # Add the specified fields
-            specified_fields = ['pricing_it', 'pricing_fr', 'fields.pac', 'fields.pac', 'fields.pac', 'fields.wei', 'fields.pac', 'fields.abn', 'fields.targ']
-            for field in specified_fields:
-                if field not in result_df.columns:
-                    result_df[field] = ""
-            
-            # Load variant attributes if file exists
-            if os.path.exists(variant_attrs_path):
-                variant_attrs_df = pd.read_csv(variant_attrs_path)
-                variant_fields = [col for col in variant_attrs_df.columns if col != 'sku']
-                
-                # Merge variant attributes with result_df
-                if variant_fields:
-                    result_df = pd.merge(result_df, variant_attrs_df, how='left', on='sku', suffixes=('', '_variant'))
-            
-            # Load parent attributes if file exists
-            if os.path.exists(parent_attrs_path):
-                parent_attrs_df = pd.read_csv(parent_attrs_path)
-                parent_fields = [col for col in parent_attrs_df.columns if col != 'sku']
-                
-                # Merge parent attributes with result_df
-                if parent_fields:
-                    result_df = pd.merge(result_df, parent_attrs_df, how='left', on='sku', suffixes=('', '_parent'))
-            
-            # Make sure specified fields come right after barcode column
-            barcode_col = None
-            if 'variant.barcode' in result_df.columns:
-                barcode_col = 'variant.barcode'
-            elif 'barcode' in result_df.columns:
-                barcode_col = 'barcode'
-                
-            if barcode_col:
-                # Create a new order of columns with specified fields after the barcode
-                col_order = list(result_df.columns)
-                barcode_pos = col_order.index(barcode_col)
-                
-                # Remove specified fields from current position
-                for field in specified_fields:
-                    if field in col_order:
-                        col_order.remove(field)
-                
-                # Insert specified fields after barcode
-                for i, field in enumerate(reversed(specified_fields)):
-                    if field in result_df.columns:
-                        col_order.insert(barcode_pos + 1, field)
-                
-                # Reorder the dataframe
-                result_df = result_df[col_order]
-        
-        except Exception as e:
-            logging.error(f"Error adding additional fields: {str(e)}")
-            import traceback
-            logging.error(traceback.format_exc())
-            
         # Save to MikesWay.csv
         output_file = os.path.join(output_dir, 'MikesWay.csv')
         result_df.to_csv(output_file, index=False)
