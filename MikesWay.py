@@ -61,6 +61,7 @@ def process_mikes_way(input_file):
             variant_rows = pd.merge(variant_rows, name_barcode_map[['sku', 'variant.name', 'variant.barcode']], 
                                   on='sku', how='left')
             variant_rows['barcode'] = variant_rows['variant.barcode']
+            # Ensure we use the variant.name from the input file for unique product names
             variant_rows['name'] = variant_rows['variant.name']
             # Remove the temporary columns
             variant_rows = variant_rows.drop(['variant.name', 'variant.barcode'], axis=1, errors='ignore')
@@ -69,6 +70,7 @@ def process_mikes_way(input_file):
             parent_rows = pd.merge(parent_rows, name_barcode_map[['sku', 'variant.name', 'variant.barcode']], 
                                  on='sku', how='left')
             parent_rows['barcode'] = parent_rows['variant.barcode'].fillna(parent_rows['sku'])
+            # Ensure parent rows also use the correct name from the input file
             parent_rows['name'] = parent_rows['variant.name'].fillna(parent_rows['fields.name'])
             # Remove the temporary columns
             parent_rows = parent_rows.drop(['variant.name', 'variant.barcode'], axis=1, errors='ignore')
