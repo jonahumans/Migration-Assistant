@@ -323,6 +323,13 @@
             currentLogOutput.textContent = 'Processing...';
             currentDownloadBtn.style.display = 'none';
 
+            // Show what's being processed in the log
+            if (useMikesWay) {
+                currentLogOutput.textContent = "Processing with Mike's Way format...";
+            } else {
+                currentLogOutput.textContent = "Processing with standard format...";
+            }
+
             fetch('/upload', {
                 method: 'POST',
                 body: formData
