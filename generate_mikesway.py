@@ -108,6 +108,36 @@ def generate_mikesway_csv():
         if not orphans.empty:
             result_df = pd.concat([result_df, orphans], ignore_index=True)
         
+        # Remove id and status columns if they exist
+        columns_to_drop = ['id', 'status']
+        for col in columns_to_drop:
+            if col in result_df.columns:
+                result_df = result_df.drop(columns=[col])
+        
+        # Reorder columns to put group, group_skus, and variant/sku at the front
+        priority_columns = []
+        if 'group' in result_df.columns:
+            priority_columns.append('group')
+        
+        # Add any group_skus columns
+        group_skus_cols = [col for col in result_df.columns if 'group_skus' in col]
+        priority_columns.extend(group_skus_cols)
+        
+        # Add variant or sku column
+        if 'variant' in result_df.columns:
+            priority_columns.append('variant')
+        if 'sku' in result_df.columns and 'sku' not in priority_columns:
+            priority_columns.append('sku')
+        
+        # Filter out columns that don't exist in dataframe
+        priority_columns = [col for col in priority_columns if col in result_df.columns]
+        
+        # Get the rest of the columns
+        other_columns = [col for col in result_df.columns if col not in priority_columns]
+        
+        # Reorder columns
+        result_df = result_df[priority_columns + other_columns]
+        
         # Save to MikesWay.csv
         output_file = os.path.join(output_dir, 'MikesWay.csv')
         result_df.to_csv(output_file, index=False)

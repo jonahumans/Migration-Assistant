@@ -174,6 +174,36 @@ def process_mikes_way(input_file):
                 elif 'sku' in result_df.columns:
                     result_df['barcode'] = result_df['sku'].apply(lambda x: ''.join(filter(str.isalnum, str(x))))
 
+        # Remove id and status columns if they exist
+        columns_to_drop = ['id', 'status']
+        for col in columns_to_drop:
+            if col in result_df.columns:
+                result_df = result_df.drop(columns=[col])
+        
+        # Reorder columns to put group, group_skus, and variant.sku at the front
+        priority_columns = []
+        if 'group' in result_df.columns:
+            priority_columns.append('group')
+        
+        # Add any group_skus columns
+        group_skus_cols = [col for col in result_df.columns if 'group_skus' in col]
+        priority_columns.extend(group_skus_cols)
+        
+        # Add variant.sku or variant column
+        if 'variant.sku' in result_df.columns:
+            priority_columns.append('variant.sku')
+        if 'variant' in result_df.columns:
+            priority_columns.append('variant')
+        
+        # Filter out columns that don't exist in dataframe
+        priority_columns = [col for col in priority_columns if col in result_df.columns]
+        
+        # Get the rest of the columns
+        other_columns = [col for col in result_df.columns if col not in priority_columns]
+        
+        # Reorder columns
+        result_df = result_df[priority_columns + other_columns]
+        
         # Save the file in Mike's Way format
         output_file = os.path.join(output_dir, 'MikesWay.csv')
         result_df.to_csv(output_file, index=False)
