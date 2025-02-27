@@ -133,18 +133,20 @@ def process_mikes_way(input_file):
                 parent_row_copy = parent_row.copy()
                 variant_rows_copy = variant_rows.copy()
                 
-                # Ensure index is unique across both dataframes
-                if not parent_row_copy.index.is_unique:
-                    parent_row_copy = parent_row_copy.reset_index(drop=True)
-                if not variant_rows_copy.index.is_unique:
-                    variant_rows_copy = variant_rows_copy.reset_index(drop=True)
+                # Always reset indexes before concatenation to avoid conflicts
+                parent_row_copy = parent_row_copy.reset_index(drop=True)
+                variant_rows_copy = variant_rows_copy.reset_index(drop=True)
                 
                 # Combine parent and variants, with parent first
                 try:
+                    # Force ignore_index=True to avoid index conflicts
                     combined = pd.concat([parent_row_copy, variant_rows_copy], ignore_index=True)
                     
-                    # Add to result
-                    result_df = pd.concat([result_df, combined], ignore_index=True)
+                    # Add to result, also with ignore_index=True
+                    if result_df.empty:
+                        result_df = combined.copy()
+                    else:
+                        result_df = pd.concat([result_df, combined], ignore_index=True)
                 except Exception as e:
                     logging.error(f"Concatenation error: {str(e)}")
                     logging.error(f"Parent row shape: {parent_row_copy.shape}, Variant rows shape: {variant_rows_copy.shape}")
@@ -303,10 +305,21 @@ def process_mikes_way(input_file):
         logging.error(error_traceback)
         # Create error file for debugging
         try:
+            # Ensure output directory exists
+            if not os.path.exists('./output'):
+                os.makedirs('./output')
+                
+            # Write detailed error log
             with open('./output/mikesway_error.log', 'w') as f:
                 f.write(f"Error: {str(e)}\n\n{error_traceback}")
-        except:
-            pass
+                
+            # Also write to root directory for easier access
+            with open('./mikesway_error.log', 'w') as f:
+                f.write(f"Error: {str(e)}\n\n{error_traceback}")
+                
+            logging.error(f"Error logs written to ./output/mikesway_error.log and ./mikesway_error.log")
+        except Exception as log_error:
+            logging.error(f"Failed to write error log: {str(log_error)}")
         return False
 
 if __name__ == "__main__":
