@@ -127,7 +127,8 @@ def download():
         'output/variant_columns.txt',
         'output/variantattributes.csv',
         'output/parentattributesonvarients.csv',
-        'output/target_pts.csv'
+        'output/target_pts.csv',
+        'output/MikesWay.csv'
     ]
     
     # Create a zip of available files
