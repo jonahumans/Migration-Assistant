@@ -31,6 +31,18 @@ def process_mikes_way(input_file):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         
+        # Check for duplicate SKUs and alert
+        if 'variant.sku' in df.columns:
+            duplicated_skus = df['variant.sku'].dropna()[df['variant.sku'].duplicated(keep=False)]
+            if not duplicated_skus.empty:
+                logging.warning(f"Duplicated SKUs found: {duplicated_skus.unique().tolist()}")
+        
+        # Check for duplicate barcodes and alert
+        if 'variant.barcode' in df.columns:
+            duplicated_barcodes = df['variant.barcode'].dropna()[df['variant.barcode'].duplicated(keep=False)]
+            if not duplicated_barcodes.empty:
+                logging.warning(f"Duplicated barcodes found: {duplicated_barcodes.unique().tolist()}")
+            
         # Process the data to create Vapor Apparel style format
         # Identify parent and variant rows
         if 'variant.product_id' in df.columns and 'id' in df.columns:
@@ -38,7 +50,7 @@ def process_mikes_way(input_file):
             parent_ids = df[df['variant.product_id'].notna()]['variant.product_id'].unique()
             
             # Create an empty DataFrame to store the results
-            result_df = pd.DataFrame(columns=df.columns)
+            result_df = pd.DataFrame()
             
             # For each parent ID
             for parent_id in parent_ids:
@@ -47,50 +59,108 @@ def process_mikes_way(input_file):
                 if parent_row.empty:
                     # Create a dummy parent if none exists
                     parent_row = pd.DataFrame([df[df['variant.product_id'] == parent_id].iloc[0].copy()])
-                    parent_name = parent_row['variant.name'].iloc[0].split(' - ')[0] if ' - ' in parent_row['variant.name'].iloc[0] else parent_row['variant.name'].iloc[0]
-                    parent_row['variant.name'] = parent_name
+                    
+                    # Extract the base product name (removing variant-specific info after " - " if present)
+                    if 'variant.name' in parent_row.columns:
+                        parent_name = parent_row['variant.name'].iloc[0].split(' - ')[0] if ' - ' in parent_row['variant.name'].iloc[0] else parent_row['variant.name'].iloc[0]
+                        parent_row['variant.name'] = parent_name
+                    elif 'name' in parent_row.columns:
+                        parent_name = parent_row['name'].iloc[0].split(' - ')[0] if ' - ' in parent_row['name'].iloc[0] else parent_row['name'].iloc[0]
+                        parent_row['name'] = parent_name
                 
                 # Set parent metadata
                 parent_row['group'] = 'product'
-                parent_row['sku'] = 'variant-' + parent_id.astype(str)
+                parent_row['sku'] = 'variant-' + str(int(parent_id))
+                parent_row['group_skus.0'] = ""  # Parent has empty group_skus.0
                 parent_row['options.0'] = 'size'
                 parent_row['options.1'] = 'color'
                 
                 # Get all variant rows for this parent
                 variant_rows = df[df['variant.product_id'] == parent_id].copy()
                 variant_rows['group'] = 'variant'
-                variant_rows['group_skus.0'] = 'variant-' + parent_id.astype(str)
+                variant_rows['group_skus.0'] = 'variant-' + str(int(parent_id))
+                
+                # Rename columns to match Vapor Apparel format
+                # For both parent and variants
+                columns_to_rename = {
+                    'variant.sku': 'sku',
+                    'variant.barcode': 'upc',
+                    'variant.mpn': 'mpn',
+                    'variant.weight': 'fields.weight.value',
+                    'variant.package_weight': 'fields.package_weight.value',
+                    'variant.height': 'fields.height.value',
+                    'variant.width': 'fields.width.value',
+                    'variant.length': 'fields.length.value',
+                    'variant.package_height': 'fields.package_height.value',
+                    'variant.package_width': 'fields.package_width.value',
+                    'variant.package_length': 'fields.package_length.value',
+                    'variant.price': 'pricing_item.price.amount',
+                    'variant.compare_price': 'pricing_item.msrp.amount',
+                    'variant.name': 'name'
+                }
+                
+                # Apply renames if columns exist
+                for old_col, new_col in columns_to_rename.items():
+                    if old_col in parent_row.columns and old_col not in ['sku']:
+                        parent_row = parent_row.rename(columns={old_col: new_col})
+                    if old_col in variant_rows.columns and old_col not in ['sku']:
+                        variant_rows = variant_rows.rename(columns={old_col: new_col})
+                
+                # Extract size and color information for variants
+                if 'option1.name' in variant_rows.columns and 'option1.value' in variant_rows.columns:
+                    size_column = variant_rows['option1.value'] if variant_rows['option1.name'].iloc[0].lower() == 'size' else variant_rows['option2.value']
+                    color_column = variant_rows['option2.value'] if variant_rows['option1.name'].iloc[0].lower() == 'size' else variant_rows['option1.value']
+                    variant_rows['fields.size'] = size_column
+                    variant_rows['fields.color'] = color_column
+                
+                # For variant names, prefix with parent name if not already there
+                if 'name' in variant_rows.columns and 'name' in parent_row.columns:
+                    parent_name = parent_row['name'].iloc[0]
+                    variant_rows['name'] = variant_rows['name'].apply(
+                        lambda x: f"{parent_name}, {x.split(' - ')[1]}" if ' - ' in x else x
+                    )
                 
                 # Combine parent and variants, with parent first
                 combined = pd.concat([parent_row, variant_rows], ignore_index=True)
                 
                 # Add to result
                 result_df = pd.concat([result_df, combined], ignore_index=True)
-            
+                
+            # Handle case where dataframe is still empty
+            if result_df.empty:
+                logging.warning("No parent-child relationships found in the data.")
+                return False
+                
         else:
-            # For files without parent-child relationship, group by product name
+            # For files without explicit parent-child relationship, group by product name
             logging.info("No explicit parent-child structure found, creating by product name")
             
             # Get unique product names (strip variant info if present)
             product_names = []
-            for name in df['name'].unique():
+            name_column = 'variant.name' if 'variant.name' in df.columns else 'name'
+            if name_column not in df.columns:
+                logging.error("Could not find name column in the data")
+                return False
+                
+            for name in df[name_column].unique():
                 base_name = name.split(' - ')[0] if ' - ' in name else name
                 if base_name not in product_names:
                     product_names.append(base_name)
             
             # Create an empty DataFrame to store the results
-            result_df = pd.DataFrame(columns=df.columns)
+            result_df = pd.DataFrame()
             
             # For each product name
             for product_id, product_name in enumerate(product_names, start=1):
                 # Find all variants with this base name
-                variants = df[df['name'].str.startswith(product_name)].copy()
+                variants = df[df[name_column].str.startswith(product_name)].copy()
                 
                 # Create parent row (use first variant as template)
                 parent_row = variants.iloc[0:1].copy()
-                parent_row['name'] = product_name
+                parent_row[name_column] = product_name
                 parent_row['group'] = 'product'
                 parent_row['sku'] = f'variant-{product_id}'
+                parent_row['group_skus.0'] = ""
                 parent_row['options.0'] = 'size'
                 parent_row['options.1'] = 'color'
                 
@@ -98,20 +168,96 @@ def process_mikes_way(input_file):
                 variants['group'] = 'variant'
                 variants['group_skus.0'] = f'variant-{product_id}'
                 
+                # Extract size and color if present
+                if 'option1.name' in variants.columns and 'option1.value' in variants.columns:
+                    size_column = variants['option1.value'] if variants['option1.name'].iloc[0].lower() == 'size' else variants['option2.value']
+                    color_column = variants['option2.value'] if variants['option1.name'].iloc[0].lower() == 'size' else variants['option1.value']
+                    variants['fields.size'] = size_column
+                    variants['fields.color'] = color_column
+                
+                # Rename columns to match Vapor Apparel format
+                columns_to_rename = {
+                    'variant.sku': 'sku',
+                    'variant.barcode': 'upc',
+                    'variant.mpn': 'mpn',
+                    'variant.weight': 'fields.weight.value',
+                    'variant.package_weight': 'fields.package_weight.value',
+                    'variant.height': 'fields.height.value',
+                    'variant.width': 'fields.width.value',
+                    'variant.length': 'fields.length.value',
+                    'variant.package_height': 'fields.package_height.value',
+                    'variant.package_width': 'fields.package_width.value',
+                    'variant.package_length': 'fields.package_length.value',
+                    'variant.price': 'pricing_item.price.amount',
+                    'variant.compare_price': 'pricing_item.msrp.amount',
+                    'variant.name': 'name'
+                }
+                
+                # Apply renames if columns exist
+                for old_col, new_col in columns_to_rename.items():
+                    if old_col in parent_row.columns and old_col not in ['sku']:
+                        parent_row = parent_row.rename(columns={old_col: new_col})
+                    if old_col in variants.columns and old_col not in ['sku']:
+                        variants = variants.rename(columns={old_col: new_col})
+                
+                # For variant names, prefix with parent name if not already there
+                name_column = 'name' if 'name' in variants.columns else name_column
+                if name_column in variants.columns and name_column in parent_row.columns:
+                    parent_name = parent_row[name_column].iloc[0]
+                    variants[name_column] = variants[name_column].apply(
+                        lambda x: f"{parent_name}, {x.split(' - ')[1]}" if ' - ' in x else x
+                    )
+                
                 # Combine parent and variants, with parent first
                 combined = pd.concat([parent_row, variants], ignore_index=True)
                 
                 # Add to result
                 result_df = pd.concat([result_df, combined], ignore_index=True)
         
+        # Copy any attribute columns from parent to all its variants (similar to parentattributesonvarients.py)
+        group_ids = result_df[result_df['group'] == 'product']['sku'].values
+        for group_id in group_ids:
+            # Get parent row
+            parent = result_df[result_df['sku'] == group_id]
+            if parent.empty:
+                continue
+                
+            # Get all variants for this parent
+            base_id = group_id.replace('variant-', '')
+            variants_mask = (result_df['group'] == 'variant') & (result_df['group_skus.0'] == f'variant-{base_id}')
+            
+            # Copy attributes from parent to variants
+            field_cols = [col for col in parent.columns if col.startswith('fields.') and 
+                         col not in ['fields.size', 'fields.color']]
+            
+            for col in field_cols:
+                if pd.notna(parent[col].iloc[0]):
+                    result_df.loc[variants_mask, col] = parent[col].iloc[0]
+        
+        # Prepend 'fields.' to all attribute columns except key ones
+        field_columns = [col for col in result_df.columns 
+                        if not col.startswith('fields.') 
+                        and col not in ['group', 'group_skus.0', 'options.0', 'options.1', 
+                                        'name', 'sku', 'mpn', 'upc', 'pricing_item.price.amount', 
+                                        'pricing_item.msrp.amount'] 
+                        and not col.startswith('option')]
+                        
+        for col in field_columns:
+            if col in result_df.columns:
+                result_df = result_df.rename(columns={col: f'fields.{col}'})
+        
         # Rearrange columns to match Vapor Apparel format
         # Ensure these key columns are at the beginning
-        key_columns = ['group', 'group_skus.0', 'options.0', 'options.1', 'name']
-        existing_columns = [col for col in key_columns if col in result_df.columns]
+        key_columns = ['group', 'group_skus.0', 'options.0', 'options.1', 'name', 
+                      'fields.description', 'sku', 'mpn', 'upc', 
+                      'pricing_item.price.amount', 'pricing_item.msrp.amount']
+        
+        # Filter for columns that actually exist in our DataFrame
+        existing_key_columns = [col for col in key_columns if col in result_df.columns]
         other_columns = [col for col in result_df.columns if col not in key_columns]
         
         # Reorder columns
-        result_df = result_df[existing_columns + other_columns]
+        result_df = result_df[existing_key_columns + other_columns]
         
         # Save the file in Mike's Way format
         output_file = os.path.join(output_dir, 'MikesWay.csv')
