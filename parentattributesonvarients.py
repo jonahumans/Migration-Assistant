@@ -42,8 +42,11 @@ def clean_parents(parents, children):
     parents.loc[:, 'sku'] = 'variant-' + parents['id'].astype(int).astype(str)  
 
 
-    # Drop the 'variant.sku' column
-    parents = parents.drop(columns=['variant.sku', 'target_enabled', 'id', 'variant.product_id'])
+    # Drop columns if they exist
+    columns_to_drop = ['variant.sku', 'id', 'variant.product_id']
+    if 'target_enabled' in parents.columns:
+        columns_to_drop.append('target_enabled')
+    parents = parents.drop(columns=[col for col in columns_to_drop if col in parents.columns])
 
     # Reorder columns to make 'sku' the first column
     columns = ['sku'] + [col for col in parents.columns if col != 'sku']
