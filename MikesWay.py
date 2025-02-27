@@ -37,25 +37,25 @@ def process_mikes_way(input_file):
             # Load original input data to get variant.name and variant.barcode
             input_file_path = os.path.join('./input', os.listdir('./input')[0])
             original_df = pd.read_csv(input_file_path)
-            
+
             # Create a mapping dataframe with sku, variant.name, and variant.barcode
             name_barcode_map = original_df[['variant.sku', 'variant.name', 'variant.barcode']].dropna(subset=['variant.sku'])
             name_barcode_map = name_barcode_map.rename(columns={'variant.sku': 'sku'})
-            
+
             # Create parent rows
             parent_rows = parents_df.copy()
             # Identify as product (parent) in the group column
             parent_rows['group'] = 'product'
-            
+
             # Create variant rows
             variant_rows = parent_attrs_df.copy()
-            
+
             # Add group_skus information
             variant_rows = pd.merge(variant_rows, group_skus_df, on='sku', how='left')
-            
+
             # Add variant attributes
             variant_rows = pd.merge(variant_rows, variant_attrs_df, on='sku', how='left')
-            
+
             # Add name and barcode from original data
             # For variant rows
             variant_rows = pd.merge(variant_rows, name_barcode_map[['sku', 'variant.name', 'variant.barcode']], 
@@ -65,7 +65,7 @@ def process_mikes_way(input_file):
             variant_rows['name'] = variant_rows['variant.name']
             # Remove the temporary columns
             variant_rows = variant_rows.drop(['variant.name', 'variant.barcode'], axis=1, errors='ignore')
-            
+
             # For parent rows (will use sku as barcode if no match found)
             parent_rows = pd.merge(parent_rows, name_barcode_map[['sku', 'variant.name', 'variant.barcode']], 
                                  on='sku', how='left')
@@ -74,7 +74,7 @@ def process_mikes_way(input_file):
             parent_rows['name'] = parent_rows['variant.name'].fillna(parent_rows['fields.name'])
             # Remove the temporary columns
             parent_rows = parent_rows.drop(['variant.name', 'variant.barcode'], axis=1, errors='ignore')
-            
+
             # Identify as variant in the group column
             variant_rows['group'] = 'variant'
 
