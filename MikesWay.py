@@ -1,3 +1,4 @@
+
 import os
 import pandas as pd
 import logging
@@ -77,9 +78,32 @@ def process_mikes_way(input_file):
 
             # Identify as variant in the group column
             variant_rows['group'] = 'variant'
+            
+            # Group variants by their parent
+            result_df = pd.DataFrame()
+            
+            # Get all unique parent SKUs
+            parent_skus = parent_rows['sku'].unique()
+            
+            # For each parent, add parent row followed by its variants
+            for parent_sku in parent_skus:
+                # Get parent row
+                parent = parent_rows[parent_rows['sku'] == parent_sku]
+                
+                # Get variant rows that belong to this parent
+                parent_group_sku = parent_sku  # The parent SKU is variant-X format
+                variants = variant_rows[variant_rows['group_skus.0'] == parent_group_sku]
+                
+                # Combine parent and its variants
+                combined = pd.concat([parent, variants], ignore_index=True)
+                
+                # Add to result
+                result_df = pd.concat([result_df, combined], ignore_index=True)
 
-            # Combine parent and variant rows
-            result_df = pd.concat([parent_rows, variant_rows], ignore_index=True)
+            # If there are any variants without a parent in our output, add them at the end
+            orphan_variants = variant_rows[~variant_rows['group_skus.0'].isin(parent_skus)]
+            if not orphan_variants.empty:
+                result_df = pd.concat([result_df, orphan_variants], ignore_index=True)
 
             # Reorder columns to put group_skus.0 immediately after sku column
             if 'group_skus.0' in result_df.columns and 'sku' in result_df.columns:
