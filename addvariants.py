@@ -42,6 +42,8 @@ def format_pricing(df):
     df['variant.price'] = df['variant.price'].apply(lambda x: '{:.2f}'.format(x) if pd.notna(x) else x)
     df['variant.compare_price'] = df['variant.compare_price'].apply(lambda x: '{:.2f}'.format(x) if pd.notna(x) else x)
     df['variant.compare_price'] = df['variant.compare_price'].fillna(df['variant.price'])  # Copy price to compare_price if NaN
+    # Ensure barcode is properly formatted
+    df['variant.barcode'] = df['variant.barcode'].astype(str).replace('nan', '')
     # Select only the required columns
     required_columns = ['variant.name', 'variant.sku', 'variant.barcode', 'variant.price', 'variant.compare_price', 'variant.images']
     df = df[required_columns]
@@ -74,11 +76,15 @@ def insert_group_column(df):
 # Rename the columns as per the requirement
 def rename_columns(df):
     logging.info("Renaming columns to match the required format")
-    return df.rename(columns={
+    # First rename the columns
+    df = df.rename(columns={
         'variant.barcode': 'upc',
         'variant.price': 'pricing_item.price',
         'variant.compare_price': 'pricing_item.msrp.amount'
     })
+    # Make sure UPC values are preserved and not converted to NaN
+    df['upc'] = df['upc'].astype(str).replace('nan', '')
+    return df
 
 # Main function to run all steps
 def main():
