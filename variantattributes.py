@@ -68,9 +68,12 @@ def rename_columns(df):
     # Rename 'variant.sku' to 'sku'
     df = df.rename(columns={'variant.sku': 'sku'})
     
-    # Rename 'variant.' columns to 'fields.' and add '.value' to specific columns like weight, height, width, length
+    # Rename 'variant.' columns to 'fields.' and add '.value' to specific columns
     df.columns = [
-        'fields.' + col[8:] + '.value' if col.startswith('variant.') and col in ['variant.weight', 'variant.height', 'variant.width', 'variant.length'] else 
+        'fields.' + col[8:] + '.value' if col.startswith('variant.') and col in [
+            'variant.weight', 'variant.height', 'variant.width', 'variant.length',
+            'variant.package_height', 'variant.package_width', 'variant.package_length', 'variant.package_weight'
+        ] else 
         'fields.' + col[8:] if col.startswith('variant.') else col
         for col in df.columns
     ]
