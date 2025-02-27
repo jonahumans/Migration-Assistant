@@ -257,16 +257,16 @@
         downloadOutputBtn.addEventListener('click', () => {
             window.location.href = '/download_output';
         });
-        
+
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.style.background = 'rgba(100, 255, 218, 0.1)';
         });
-        
+
         uploadArea.addEventListener('dragleave', () => {
             uploadArea.style.background = 'transparent';
         });
-        
+
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.style.background = 'transparent';
@@ -283,16 +283,16 @@
 
         // Mike's Way file upload handlers
         mikesUploadArea.addEventListener('click', () => mikesFileInput.click());
-        
+
         mikesUploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             mikesUploadArea.style.background = 'rgba(100, 255, 218, 0.1)';
         });
-        
+
         mikesUploadArea.addEventListener('dragleave', () => {
             mikesUploadArea.style.background = 'transparent';
         });
-        
+
         mikesUploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             mikesUploadArea.style.background = 'transparent';
@@ -304,7 +304,10 @@
 
         mikesFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) handleFile(file, true);
+            if (file) {
+                console.log("Mike's Way file selected:", file.name);
+                handleFile(file, true);
+            }
         });
 
         // Common file handling function
@@ -350,6 +353,7 @@
                 }
             })
             .catch(error => {
+                console.error("Fetch error:", error);
                 currentProgressBar.style.width = '0%';
                 currentLogOutput.style.display = 'block';
                 currentLogOutput.textContent = 'Error: ' + error.message;
@@ -360,7 +364,7 @@
         downloadBtn.addEventListener('click', () => {
             window.location.href = '/download';
         });
-        
+
         mikesDownloadBtn.addEventListener('click', () => {
             window.location.href = '/download';
         });
