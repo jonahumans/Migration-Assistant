@@ -312,52 +312,65 @@
 
         // Common file handling function
         function handleFile(file, useMikesWay) {
-            console.log("Processing file with Mike's Way:", useMikesWay);
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('use_mikes_way', useMikesWay.toString());
+            try {
+                console.log("Processing file with Mike's Way:", useMikesWay);
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('use_mikes_way', useMikesWay ? 'true' : 'false');
 
-            // Use the appropriate UI elements based on which upload was used
-            const currentProgressBar = useMikesWay ? mikesProgressBar : progressBar;
-            const currentLogOutput = useMikesWay ? mikesLogOutput : logOutput;
-            const currentDownloadBtn = useMikesWay ? mikesDownloadBtn : downloadBtn;
+                // Use the appropriate UI elements based on which upload was used
+                const currentProgressBar = useMikesWay ? mikesProgressBar : progressBar;
+                const currentLogOutput = useMikesWay ? mikesLogOutput : logOutput;
+                const currentDownloadBtn = useMikesWay ? mikesDownloadBtn : downloadBtn;
 
-            currentProgressBar.style.width = '0%';
-            currentLogOutput.style.display = 'block';
-            currentLogOutput.textContent = 'Processing...';
-            currentDownloadBtn.style.display = 'none';
-
-            // Show what's being processed in the log
-            if (useMikesWay) {
-                currentLogOutput.textContent = "Processing with Mike's Way format...";
-            } else {
-                currentLogOutput.textContent = "Processing with standard format...";
-            }
-
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (!currentProgressBar || !currentLogOutput || !currentDownloadBtn) {
+                    console.error("UI elements not found:", {
+                        progressBar: !!currentProgressBar, 
+                        logOutput: !!currentLogOutput, 
+                        downloadBtn: !!currentDownloadBtn
+                    });
+                    return;
                 }
-                return response.json();
-            })
-            .then(data => {
-                currentProgressBar.style.width = '100%';
-                currentLogOutput.textContent = data.log.join('\n');
-                if (data.status === 'success') {
-                    currentDownloadBtn.style.display = 'inline-block';
-                    currentLogOutput.textContent += '\nProcessing complete! Click Download to get all files.';
-                }
-            })
-            .catch(error => {
-                console.error("Fetch error:", error);
+
                 currentProgressBar.style.width = '0%';
                 currentLogOutput.style.display = 'block';
-                currentLogOutput.textContent = 'Error: ' + error.message;
-            });
+                currentLogOutput.textContent = 'Processing...';
+                currentDownloadBtn.style.display = 'none';
+
+                // Show what's being processed in the log
+                if (useMikesWay) {
+                    currentLogOutput.textContent = "Processing with Mike's Way format...";
+                } else {
+                    currentLogOutput.textContent = "Processing with standard format...";
+                }
+
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    currentProgressBar.style.width = '100%';
+                    currentLogOutput.textContent = data.log.join('\n');
+                    if (data.status === 'success') {
+                        currentDownloadBtn.style.display = 'inline-block';
+                        currentLogOutput.textContent += '\nProcessing complete! Click Download to get all files.';
+                    }
+                })
+                .catch(error => {
+                    console.error("Fetch error:", error);
+                    currentProgressBar.style.width = '0%';
+                    currentLogOutput.style.display = 'block';
+                    currentLogOutput.textContent = 'Error: ' + error.message;
+                });
+            } catch (err) {
+                console.error("Error in handleFile:", err);
+            }
         }
 
         // Download handlers
