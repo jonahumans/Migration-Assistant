@@ -276,7 +276,14 @@ def process_mikes_way(input_file):
     except Exception as e:
         logging.error(f"Error processing data: {str(e)}")
         import traceback
-        logging.error(traceback.format_exc())
+        error_traceback = traceback.format_exc()
+        logging.error(error_traceback)
+        # Create error file for debugging
+        try:
+            with open('./output/mikesway_error.log', 'w') as f:
+                f.write(f"Error: {str(e)}\n\n{error_traceback}")
+        except:
+            pass
         return False
 
 if __name__ == "__main__":
