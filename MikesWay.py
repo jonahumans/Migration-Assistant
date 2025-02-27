@@ -36,22 +36,23 @@ def process_mikes_way(input_file):
 
             # Create parent rows
             parent_rows = parents_df.copy()
+            # Identify as product (parent) in the group column
             parent_rows['group'] = 'product'
-
+            
             # Create variant rows
             variant_rows = parent_attrs_df.copy()
-
+            
             # Add group_skus information
             variant_rows = pd.merge(variant_rows, group_skus_df, on='sku', how='left')
-
+            
             # Add variant attributes
             variant_rows = pd.merge(variant_rows, variant_attrs_df, on='sku', how='left')
-
+            
             # Add barcode column
             variant_rows['barcode'] = variant_rows['sku']
             parent_rows['barcode'] = parent_rows['sku']
-
-            # Add group column for variants
+            
+            # Identify as variant in the group column
             variant_rows['group'] = 'variant'
 
             # Combine parent and variant rows
