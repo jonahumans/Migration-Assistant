@@ -114,23 +114,8 @@ def generate_mikesway_csv():
             if col in result_df.columns:
                 result_df = result_df.drop(columns=[col])
         
-        # For parent rows, set sku to match group_skus of its variants
-        if 'group' in result_df.columns:
-            # For parent rows
-            parent_mask = result_df['group'] == 'product'
-            if 'group_skus.0' in result_df.columns:
-                # Where parent has group_skus.0, use that value for sku
-                result_df.loc[parent_mask & result_df['group_skus.0'].notna(), 'sku'] = result_df.loc[parent_mask & result_df['group_skus.0'].notna(), 'group_skus.0']
-        
-        # Reorder columns to put variant.barcode, group, group_skus, and variant/sku at the front
+        # Reorder columns to put group, group_skus, and variant/sku at the front
         priority_columns = []
-        
-        # Add variant.barcode first if it exists
-        if 'variant.barcode' in result_df.columns:
-            priority_columns.append('variant.barcode')
-        elif 'barcode' in result_df.columns:
-            priority_columns.append('barcode')
-            
         if 'group' in result_df.columns:
             priority_columns.append('group')
         

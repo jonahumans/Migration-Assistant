@@ -180,23 +180,8 @@ def process_mikes_way(input_file):
             if col in result_df.columns:
                 result_df = result_df.drop(columns=[col])
         
-        # For parent rows, set sku to match group_skus of its variants
-        if 'group' in result_df.columns and 'group_skus.0' in result_df.columns:
-            # For each row where group is 'product'
-            for idx in result_df[result_df['group'] == 'product'].index:
-                parent_id = result_df.loc[idx, 'sku'].replace('variant-', '')
-                # Set sku to match group_skus pattern
-                result_df.loc[idx, 'sku'] = result_df.loc[idx, 'group_skus.0'] if pd.notna(result_df.loc[idx, 'group_skus.0']) else result_df.loc[idx, 'sku']
-        
-        # Reorder columns to put variant.barcode, group, group_skus, and variant.sku at the front
+        # Reorder columns to put group, group_skus, and variant.sku at the front
         priority_columns = []
-        
-        # Add variant.barcode first if it exists
-        if 'variant.barcode' in result_df.columns:
-            priority_columns.append('variant.barcode')
-        elif 'barcode' in result_df.columns:
-            priority_columns.append('barcode')
-            
         if 'group' in result_df.columns:
             priority_columns.append('group')
         
