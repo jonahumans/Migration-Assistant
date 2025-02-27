@@ -73,7 +73,10 @@ def main():
                 # Try to split by comma if it's a string with multiple values
                 templates = [t.strip() for t in str(value).split(',')]
                 # Remove duplicates by converting to set and back to list
-                unique_templates = list(dict.fromkeys(templates))
+                unique_templates = []
+                for template in templates:
+                    if template and template not in unique_templates:
+                        unique_templates.append(template)
                 return ','.join(unique_templates)
             except:
                 return value
