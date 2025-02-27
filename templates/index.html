@@ -309,6 +309,7 @@
 
         // Common file handling function
         function handleFile(file, useMikesWay) {
+            console.log("Processing file with Mike's Way:", useMikesWay);
             const formData = new FormData();
             formData.append('file', file);
             formData.append('use_mikes_way', useMikesWay.toString());

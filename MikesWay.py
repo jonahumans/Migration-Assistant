@@ -23,8 +23,10 @@ def process_mikes_way(input_file):
     
     try:
         # Read the CSV file
+        logging.info(f"Attempting to read input file: {input_file}")
         df = pd.read_csv(input_file, low_memory=False)
-        logging.info(f"Loaded {len(df)} records from {input_file}")
+        logging.info(f"Successfully loaded {len(df)} records from {input_file}")
+        logging.info(f"Columns found: {', '.join(df.columns)}")
         
         # Create output directory if it doesn't exist
         output_dir = './output'

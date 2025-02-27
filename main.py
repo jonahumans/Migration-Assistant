@@ -88,11 +88,15 @@ def upload_file():
                 log_messages.append("Running Mike's Way processing...")
                 try:
                     import MikesWay
+                    logging.info(f"Starting Mike's Way processing for file: {file_path}")
                     if MikesWay.process_mikes_way(file_path):
                         log_messages.append("✓ Mike's Way processing completed successfully.")
                     else:
-                        log_messages.append("✗ Error in Mike's Way processing.")
+                        log_messages.append("✗ Error in Mike's Way processing. Check server logs for details.")
                 except Exception as e:
+                    import traceback
+                    error_trace = traceback.format_exc()
+                    logging.error(f"Mike's Way processing error: {str(e)}\n{error_trace}")
                     log_messages.append(f"✗ Error in Mike's Way processing: {str(e)}")
 
             # Create zip file
